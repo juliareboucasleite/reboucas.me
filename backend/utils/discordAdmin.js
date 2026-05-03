@@ -24,7 +24,7 @@ function listImageAssets() {
       .sort((a, b) => a.localeCompare(b))
       .map((fileName) => ({
         value: fileName,
-        label: fileName.replace(/\.[^.]+$/, ''),
+        label: fileName,
       }));
   } catch (_) {
     return [];
