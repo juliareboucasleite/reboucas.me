@@ -6,7 +6,11 @@ const { carregarEventos } = require('./handlers/eventos');
 const { criarServidor } = require('./backend/server');
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
 carregarComandos(client);
