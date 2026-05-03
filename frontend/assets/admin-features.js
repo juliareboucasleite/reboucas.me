@@ -6,6 +6,13 @@
 (function () {
   'use strict';
 
+  const DEFAULT_IMAGE_ASSETS = [
+    { value: 'Welcome.png', label: 'Welcome.png' },
+    { value: 'byebye.png', label: 'byebye.png' },
+    { value: 'Logo.png', label: 'Logo.png' },
+    { value: 'prices.png', label: 'prices.png' },
+  ];
+
   function $(sel, ctx = document) { return ctx.querySelector(sel); }
   function $$(sel, ctx = document) { return [...ctx.querySelectorAll(sel)]; }
 
@@ -28,7 +35,10 @@
 
   async function popularImageAssets() {
     try {
-      const assets = await api('api/admin/dashboard').then((d) => d.images || []);
+      const assetsFromApi = await api('api/admin/dashboard').then((d) => d.images || []);
+      const assets = [...DEFAULT_IMAGE_ASSETS, ...assetsFromApi].filter((asset, index, array) =>
+        index === array.findIndex((item) => item.value === asset.value),
+      );
       const options = ['<option value="">Sem imagem</option>']
         .concat(assets.map((asset) => `<option value="${escapeHtml(asset.value)}">${escapeHtml(asset.label)}</option>`))
         .join('');

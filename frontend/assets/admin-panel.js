@@ -25,6 +25,13 @@ const refs = {
   goodbyeCard: document.getElementById('goodbye-preview-card'),
 };
 
+const DEFAULT_IMAGE_ASSETS = [
+  { value: 'Welcome.png', label: 'Welcome.png' },
+  { value: 'byebye.png', label: 'byebye.png' },
+  { value: 'Logo.png', label: 'Logo.png' },
+  { value: 'prices.png', label: 'prices.png' },
+];
+
 function escapeHtml(value) {
   return String(value ?? '')
     .replaceAll('&', '&amp;')
@@ -202,9 +209,12 @@ function fillChannelSelects() {
 
 async function fillImageAssetSelects() {
   try {
-    const assets = state.imageAssets || [];
+    const assets = [...DEFAULT_IMAGE_ASSETS, ...(state.imageAssets || [])];
+    const uniqueAssets = assets.filter((asset, index, array) =>
+      index === array.findIndex((item) => item.value === asset.value),
+    );
     const options = ['<option value="">Sem imagem</option>']
-      .concat(assets.map((asset) => `<option value="${escapeHtml(asset.value)}">${escapeHtml(asset.label)}</option>`))
+      .concat(uniqueAssets.map((asset) => `<option value="${escapeHtml(asset.value)}">${escapeHtml(asset.label)}</option>`))
       .join('');
 
     document.querySelectorAll('[data-image-asset-select]').forEach((select) => {
