@@ -7,6 +7,15 @@
     <base href="__BASE_PATH__/" />
     <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin />
     <link rel="stylesheet" href="styles/style.css" />
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem('pawshop-theme') === 'dark') {
+            document.documentElement.dataset.theme = 'dark';
+          }
+        } catch (_) {}
+      })();
+    </script>
   </head>
   <body class="admin-page">
     <header class="topo">
