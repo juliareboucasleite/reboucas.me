@@ -3,23 +3,53 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Pawshop · Roblox</title>
+    <title>Pawshop · zine de Roblox</title>
     <base href="__BASE_PATH__/" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="styles/style.css" />
   </head>
   <body>
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker__track">
+        <span>PAWSHOP <span class="ticker__dot"></span> ROBLOX FITS &amp; UGC &amp; BOTS</span>
+        <span>EST. 2025 <span class="ticker__dot"></span> SHIPPING WORLDWIDE.RBX</span>
+        <span>PAWSHOP <span class="ticker__dot"></span> ROBLOX FITS &amp; UGC &amp; BOTS</span>
+        <span>EST. 2025 <span class="ticker__dot"></span> SHIPPING WORLDWIDE.RBX</span>
+        <span>PAWSHOP <span class="ticker__dot"></span> ROBLOX FITS &amp; UGC &amp; BOTS</span>
+      </div>
+    </div>
+
     <header class="topo">
-      <h1>Pawshop</h1>
-      <p>Roupas · UGC · Bots para Roblox</p>
-      <nav>
-        <a href="#catalogo">Catálogo</a>
-        <a href="login">Painel admin</a>
-      </nav>
+      <div class="topo__row">
+        <span>// edição nº 001 — outono · primavera</span>
+        <nav class="nav">
+          <a href="#catalogo">Catálogo</a>
+          <a href="login">Painel admin</a>
+        </nav>
+      </div>
+
+      <h1>
+        <span class="word">PAW</span><span class="word word--shop">shop</span>
+      </h1>
+
+      <p class="topo__sub">Roupas — UGC — Bots — para o seu Roblox</p>
+
+      <span class="paw paw--magenta paw--big" style="top: 14%; right: 6%; transform: rotate(-18deg);"></span>
+      <span class="paw" style="bottom: 18%; left: 4%; width: 70px; height: 70px; transform: rotate(22deg);"></span>
+      <span class="sticker sticker--lime" style="top: 18%; left: 6%; --r: -8deg; transform: rotate(-8deg);">★ Roblox Drop</span>
+      <span class="sticker sticker--magenta" style="bottom: 8%; right: 8%; --r: 12deg; transform: rotate(12deg);">handmade pra vc</span>
     </header>
 
     <main>
-      <section class="filtros">
-        <button data-cat="">Todos</button>
+      <div class="section-label">
+        <span class="section-label__num">01 / Catálogo</span>
+        <span class="section-label__title">tudo o que está rolando agora</span>
+        <span class="section-label__rule"></span>
+      </div>
+
+      <section class="filtros" aria-label="Filtros de categoria">
+        <button data-cat="" class="is-active">Todos</button>
         <button data-cat="roupas">Roupas</button>
         <button data-cat="ugc">UGC</button>
         <button data-cat="bots">Bots</button>
@@ -28,33 +58,44 @@
       <section id="catalogo" class="grid"></section>
     </main>
 
-    <footer><small>© Pawshop</small></footer>
+    <footer>
+      <small>© Pawshop <span class="heart">♥</span> ROBLOX shop</small>
+      <small>made by paws, for paws</small>
+    </footer>
 
     <script>
       const grid = document.getElementById('catalogo');
+      const botoes = document.querySelectorAll('.filtros button');
 
       async function carregar(categoria = '') {
         const url = categoria ? `api/produtos?categoria=${categoria}` : 'api/produtos';
         const r = await fetch(url);
         const { produtos } = await r.json();
+        if (produtos.length === 0) {
+          grid.innerHTML = '<article class="card" data-empty>Nenhum produto ainda. Volte logo ✿</article>';
+          return;
+        }
         grid.innerHTML = produtos
           .map(
             (p) => `
               <article class="card">
-                ${p.imagem ? `<img src="${p.imagem}" alt="${p.nome}" />` : ''}
-                <h3>${p.nome}</h3>
+                ${p.imagem ? `<img src="${p.imagem}" alt="${p.nome}" loading="lazy" />` : ''}
                 <p class="cat">${p.categoria}</p>
+                <h3>${p.nome}</h3>
                 <p>${p.descricao ?? ''}</p>
                 <p class="preco">${p.preco} ${p.moeda}</p>
-                ${p.link ? `<a href="${p.link}" target="_blank" rel="noopener">Ver</a>` : ''}
+                ${p.link ? `<a href="${p.link}" target="_blank" rel="noopener">Comprar →</a>` : ''}
               </article>`,
           )
           .join('');
-        if (produtos.length === 0) grid.innerHTML = '<p>Nenhum produto ainda.</p>';
       }
 
-      document.querySelectorAll('.filtros button').forEach((b) => {
-        b.addEventListener('click', () => carregar(b.dataset.cat));
+      botoes.forEach((b) => {
+        b.addEventListener('click', () => {
+          botoes.forEach((x) => x.classList.remove('is-active'));
+          b.classList.add('is-active');
+          carregar(b.dataset.cat);
+        });
       });
 
       carregar();

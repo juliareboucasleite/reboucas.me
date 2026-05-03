@@ -3,47 +3,78 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Painel · Pawshop</title>
+    <title>Bullpen · Pawshop</title>
     <base href="__BASE_PATH__/" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="styles/style.css" />
   </head>
   <body>
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker__track">
+        <span>BULLPEN <span class="ticker__dot"></span> EDIÇÃO INTERNA — STAFF ONLY</span>
+        <span>PAWSHOP <span class="ticker__dot"></span> CATALOG MGMT v1</span>
+        <span>BULLPEN <span class="ticker__dot"></span> EDIÇÃO INTERNA — STAFF ONLY</span>
+        <span>PAWSHOP <span class="ticker__dot"></span> CATALOG MGMT v1</span>
+      </div>
+    </div>
+
     <header class="topo">
-      <h1>Painel admin</h1>
-      <nav>
-        <span id="me"></span>
-        <a href=".">Portfolio</a>
-        <a href="auth/logout">Sair</a>
-      </nav>
+      <div class="topo__row">
+        <span>// painel admin · catálogo</span>
+        <nav class="nav">
+          <span id="me">…</span>
+          <a href=".">Portfolio</a>
+          <a href="auth/logout">Sair</a>
+        </nav>
+      </div>
+
+      <h1><span class="word">BULL</span><span class="word word--shop">pen</span></h1>
+      <p class="topo__sub">Edite o catálogo · Adicione novos drops · Sem mistério</p>
+
+      <span class="paw paw--lime" style="top: 22%; right: 8%; width: 80px; height: 80px; transform: rotate(15deg);"></span>
     </header>
 
-    <main class="painel">
-      <section class="form">
-        <h2>Adicionar produto</h2>
-        <form id="form-novo">
-          <input name="nome" placeholder="Nome" required />
-          <select name="categoria" required>
-            <option value="roupas">Roupas</option>
-            <option value="ugc">UGC</option>
-            <option value="bots">Bots</option>
-          </select>
-          <input name="preco" type="number" min="0" placeholder="Preço" required />
-          <select name="moeda">
-            <option value="robux">Robux</option>
-            <option value="brl">BRL</option>
-          </select>
-          <input name="link" placeholder="Link (opcional)" />
-          <input name="imagem" placeholder="URL da imagem (opcional)" />
-          <textarea name="descricao" placeholder="Descrição (opcional)"></textarea>
-          <button type="submit">Adicionar</button>
-        </form>
-      </section>
+    <main>
+      <div class="section-label">
+        <span class="section-label__num">A / catálogo</span>
+        <span class="section-label__title">administração de produtos</span>
+        <span class="section-label__rule"></span>
+      </div>
 
-      <section>
-        <h2>Produtos</h2>
-        <div id="lista" class="grid"></div>
-      </section>
+      <div class="painel">
+        <section class="form">
+          <h2>Adicionar produto</h2>
+          <form id="form-novo">
+            <input name="nome" placeholder="Nome do produto" required />
+            <select name="categoria" required>
+              <option value="roupas">Roupas</option>
+              <option value="ugc">UGC</option>
+              <option value="bots">Bots</option>
+            </select>
+            <input name="preco" type="number" min="0" placeholder="Preço" required />
+            <select name="moeda">
+              <option value="robux">Robux</option>
+              <option value="brl">BRL</option>
+            </select>
+            <input name="link" placeholder="Link do produto (opcional)" />
+            <input name="imagem" placeholder="URL da imagem (opcional)" />
+            <textarea name="descricao" placeholder="Descrição curta (opcional)"></textarea>
+            <button type="submit">+ Adicionar ao catálogo</button>
+          </form>
+        </section>
+
+        <section>
+          <h2>Produtos no ar</h2>
+          <div id="lista" class="grid"></div>
+        </section>
+      </div>
     </main>
+
+    <footer>
+      <small>© Pawshop · staff only</small>
+      <small>bullpen v1 — pawshop.rbx</small>
+    </footer>
 
     <script>
       const lista = document.getElementById('lista');
@@ -52,18 +83,23 @@
       fetch('api/me')
         .then((r) => r.json())
         .then((u) => {
-          if (u) meEl.textContent = `${u.global_name ?? u.username} (${u.id})`;
+          if (u) meEl.textContent = `★ ${u.global_name ?? u.username}`;
+          else meEl.textContent = '—';
         });
 
       async function carregar() {
         const r = await fetch('api/admin/produtos');
         const produtos = await r.json();
+        if (produtos.length === 0) {
+          lista.innerHTML = '<article class="card" data-empty>Nenhum produto cadastrado.</article>';
+          return;
+        }
         lista.innerHTML = produtos
           .map(
             (p) => `
               <article class="card">
-                <h3>${p.nome}</h3>
                 <p class="cat">${p.categoria}</p>
+                <h3>${p.nome}</h3>
                 <p class="preco">${p.preco} ${p.moeda}</p>
                 <button data-del="${p.id}">Remover</button>
               </article>`,
@@ -71,6 +107,7 @@
           .join('');
         lista.querySelectorAll('button[data-del]').forEach((b) => {
           b.addEventListener('click', async () => {
+            if (!confirm('Remover este produto?')) return;
             await fetch(`api/admin/produtos/${b.dataset.del}`, { method: 'DELETE' });
             carregar();
           });
