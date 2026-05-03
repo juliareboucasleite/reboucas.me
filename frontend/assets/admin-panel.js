@@ -2,6 +2,7 @@ const state = {
   guild: null,
   stats: null,
   channels: [],
+  imageAssets: [],
   settings: null,
   products: [],
   logs: [],
@@ -201,7 +202,7 @@ function fillChannelSelects() {
 
 async function fillImageAssetSelects() {
   try {
-    const assets = await requestJson('api/admin/images');
+    const assets = state.imageAssets || [];
     const options = ['<option value="">Sem imagem</option>']
       .concat(assets.map((asset) => `<option value="${escapeHtml(asset.value)}">${escapeHtml(asset.label)}</option>`))
       .join('');
@@ -354,6 +355,7 @@ async function loadDashboard() {
   state.guild = payload.guild;
   state.stats = payload.stats;
   state.channels = payload.channels || [];
+  state.imageAssets = payload.images || [];
   state.settings = payload.settings || null;
   state.logs = payload.logs || [];
   state.products = await requestJson('api/admin/produtos');

@@ -164,6 +164,7 @@ function criarAdminRouter(client) {
     const guild = await getManagedGuild(client);
     const guildId = getManagedGuildId(client);
     const channels = await listGuildChannels(client, guildId);
+    const images = listImageAssets();
     const settings = guildId ? lerConfigGuild(guildId) : null;
     const logs = lerLogsAtividade(40).filter((entry) => !guildId || entry.guildId === guildId);
 
@@ -183,6 +184,7 @@ function criarAdminRouter(client) {
         logs: logs.length,
       },
       channels,
+      images,
       settings,
       logs,
     });

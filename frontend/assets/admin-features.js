@@ -28,7 +28,7 @@
 
   async function popularImageAssets() {
     try {
-      const assets = await api('api/admin/images');
+      const assets = await api('api/admin/dashboard').then((d) => d.images || []);
       const options = ['<option value="">Sem imagem</option>']
         .concat(assets.map((asset) => `<option value="${escapeHtml(asset.value)}">${escapeHtml(asset.label)}</option>`))
         .join('');
@@ -60,6 +60,7 @@
 
   // ---------- popula selects compartilhados ----------
   async function popularSelects() {
+    await popularImageAssets();
     try {
       const [channels, roles, categories, forums] = await Promise.all([
         api('api/admin/dashboard').then((d) => d.channels || []),
@@ -103,8 +104,6 @@
           forums.map((f) => `<option value="${f.id}">${escapeHtml(f.name)}</option>`).join('');
         if (cur) sel.value = cur;
       });
-
-      await popularImageAssets();
     } catch (err) {
       console.warn('[features] popular selects falhou', err);
     }
