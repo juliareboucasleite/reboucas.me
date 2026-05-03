@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pawshop · Roblox</title>
+    <link rel="stylesheet" href="/styles/style.css" />
+  </head>
+  <body>
+    <header class="topo">
+      <h1>Pawshop</h1>
+      <p>Roupas · UGC · Bots para Roblox</p>
+      <nav>
+        <a href="#catalogo">Catálogo</a>
+        <a href="/login">Painel admin</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="filtros">
+        <button data-cat="">Todos</button>
+        <button data-cat="roupas">Roupas</button>
+        <button data-cat="ugc">UGC</button>
+        <button data-cat="bots">Bots</button>
+      </section>
+
+      <section id="catalogo" class="grid"></section>
+    </main>
+
+    <footer><small>© Pawshop</small></footer>
+
+    <script>
+      const grid = document.getElementById('catalogo');
+
+      async function carregar(categoria = '') {
+        const url = categoria ? `/api/produtos?categoria=${categoria}` : '/api/produtos';
+        const r = await fetch(url);
+        const { produtos } = await r.json();
+        grid.innerHTML = produtos
+          .map(
+            (p) => `
+              <article class="card">
+                ${p.imagem ? `<img src="${p.imagem}" alt="${p.nome}" />` : ''}
+                <h3>${p.nome}</h3>
+                <p class="cat">${p.categoria}</p>
+                <p>${p.descricao ?? ''}</p>
+                <p class="preco">${p.preco} ${p.moeda}</p>
+                ${p.link ? `<a href="${p.link}" target="_blank" rel="noopener">Ver</a>` : ''}
+              </article>`,
+          )
+          .join('');
+        if (produtos.length === 0) grid.innerHTML = '<p>Nenhum produto ainda.</p>';
+      }
+
+      document.querySelectorAll('.filtros button').forEach((b) => {
+        b.addEventListener('click', () => carregar(b.dataset.cat));
+      });
+
+      carregar();
+    </script>
+  </body>
+</html>

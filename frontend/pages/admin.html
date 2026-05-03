@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Painel · Pawshop</title>
+    <link rel="stylesheet" href="/styles/style.css" />
+  </head>
+  <body>
+    <header class="topo">
+      <h1>Painel admin</h1>
+      <nav>
+        <span id="me"></span>
+        <a href="/">Portfolio</a>
+        <a href="/auth/logout">Sair</a>
+      </nav>
+    </header>
+
+    <main class="painel">
+      <section class="form">
+        <h2>Adicionar produto</h2>
+        <form id="form-novo">
+          <input name="nome" placeholder="Nome" required />
+          <select name="categoria" required>
+            <option value="roupas">Roupas</option>
+            <option value="ugc">UGC</option>
+            <option value="bots">Bots</option>
+          </select>
+          <input name="preco" type="number" min="0" placeholder="Preço" required />
+          <select name="moeda">
+            <option value="robux">Robux</option>
+            <option value="brl">BRL</option>
+          </select>
+          <input name="link" placeholder="Link (opcional)" />
+          <input name="imagem" placeholder="URL da imagem (opcional)" />
+          <textarea name="descricao" placeholder="Descrição (opcional)"></textarea>
+          <button type="submit">Adicionar</button>
+        </form>
+      </section>
+
+      <section>
+        <h2>Produtos</h2>
+        <div id="lista" class="grid"></div>
+      </section>
+    </main>
+
+    <script>
+      const lista = document.getElementById('lista');
+      const meEl = document.getElementById('me');
+
+      fetch('/api/me')
+        .then((r) => r.json())
+        .then((u) => {
+          if (u) meEl.textContent = `${u.global_name ?? u.username} (${u.id})`;
+        });
+
+      async function carregar() {
+        const r = await fetch('/api/admin/produtos');
+        const produtos = await r.json();
+        lista.innerHTML = produtos
+          .map(
+            (p) => `
+              <article class="card">
+                <h3>${p.nome}</h3>
+                <p class="cat">${p.categoria}</p>
+                <p class="preco">${p.preco} ${p.moeda}</p>
+                <button data-del="${p.id}">Remover</button>
+              </article>`,
+          )
+          .join('');
+        lista.querySelectorAll('button[data-del]').forEach((b) => {
+          b.addEventListener('click', async () => {
+            await fetch(`/api/admin/produtos/${b.dataset.del}`, { method: 'DELETE' });
+            carregar();
+          });
+        });
+      }
+
+      document.getElementById('form-novo').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const dados = Object.fromEntries(new FormData(e.target).entries());
+        const r = await fetch('/api/admin/produtos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dados),
+        });
+        if (r.ok) {
+          e.target.reset();
+          carregar();
+        } else {
+          alert('Erro ao adicionar.');
+        }
+      });
+
+      carregar();
+    </script>
+  </body>
+</html>
