@@ -1,4 +1,6 @@
 const express = require('express');
+const { withBasePath } = require('../utils/basePath');
+
 const router = express.Router();
 
 const DISCORD_API = 'https://discord.com/api';
@@ -44,7 +46,7 @@ router.get('/callback', async (req, res) => {
       global_name: user.global_name,
       avatar: user.avatar,
     };
-    res.redirect('/admin');
+    res.redirect(withBasePath('/admin'));
   } catch (err) {
     console.error('[auth]', err);
     res.status(500).send('Falha ao autenticar com o Discord.');
@@ -52,7 +54,7 @@ router.get('/callback', async (req, res) => {
 });
 
 router.get('/logout', (req, res) => {
-  req.session.destroy(() => res.redirect('/'));
+  req.session.destroy(() => res.redirect(withBasePath('/')));
 });
 
 module.exports = router;

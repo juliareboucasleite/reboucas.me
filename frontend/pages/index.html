@@ -4,7 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Pawshop · Roblox</title>
-    <link rel="stylesheet" href="/styles/style.css" />
+    <base href="__BASE_PATH__/" />
+    <link rel="stylesheet" href="styles/style.css" />
   </head>
   <body>
     <header class="topo">
@@ -12,7 +13,7 @@
       <p>Roupas · UGC · Bots para Roblox</p>
       <nav>
         <a href="#catalogo">Catálogo</a>
-        <a href="/login">Painel admin</a>
+        <a href="login">Painel admin</a>
       </nav>
     </header>
 
@@ -33,7 +34,7 @@
       const grid = document.getElementById('catalogo');
 
       async function carregar(categoria = '') {
-        const url = categoria ? `/api/produtos?categoria=${categoria}` : '/api/produtos';
+        const url = categoria ? `api/produtos?categoria=${categoria}` : 'api/produtos';
         const r = await fetch(url);
         const { produtos } = await r.json();
         grid.innerHTML = produtos

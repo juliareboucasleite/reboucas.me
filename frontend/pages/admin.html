@@ -4,15 +4,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Painel · Pawshop</title>
-    <link rel="stylesheet" href="/styles/style.css" />
+    <base href="__BASE_PATH__/" />
+    <link rel="stylesheet" href="styles/style.css" />
   </head>
   <body>
     <header class="topo">
       <h1>Painel admin</h1>
       <nav>
         <span id="me"></span>
-        <a href="/">Portfolio</a>
-        <a href="/auth/logout">Sair</a>
+        <a href=".">Portfolio</a>
+        <a href="auth/logout">Sair</a>
       </nav>
     </header>
 
@@ -48,14 +49,14 @@
       const lista = document.getElementById('lista');
       const meEl = document.getElementById('me');
 
-      fetch('/api/me')
+      fetch('api/me')
         .then((r) => r.json())
         .then((u) => {
           if (u) meEl.textContent = `${u.global_name ?? u.username} (${u.id})`;
         });
 
       async function carregar() {
-        const r = await fetch('/api/admin/produtos');
+        const r = await fetch('api/admin/produtos');
         const produtos = await r.json();
         lista.innerHTML = produtos
           .map(
@@ -70,7 +71,7 @@
           .join('');
         lista.querySelectorAll('button[data-del]').forEach((b) => {
           b.addEventListener('click', async () => {
-            await fetch(`/api/admin/produtos/${b.dataset.del}`, { method: 'DELETE' });
+            await fetch(`api/admin/produtos/${b.dataset.del}`, { method: 'DELETE' });
             carregar();
           });
         });
@@ -79,7 +80,7 @@
       document.getElementById('form-novo').addEventListener('submit', async (e) => {
         e.preventDefault();
         const dados = Object.fromEntries(new FormData(e.target).entries());
-        const r = await fetch('/api/admin/produtos', {
+        const r = await fetch('api/admin/produtos', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(dados),
