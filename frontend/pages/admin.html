@@ -261,10 +261,8 @@
                 </label>
                 <label>
                   Asset
-                  <select name="imageAsset">
-                    <option value="">Sem imagem especial</option>
-                    <option value="welcome">Welcome</option>
-                    <option value="goodbye">Byebye</option>
+                  <select name="imageAsset" data-image-asset-select>
+                    <option value="">Carregando imagens...</option>
                   </select>
                 </label>
               </div>
@@ -365,12 +363,14 @@
                 </label>
               </div>
               <label>
-                URL da imagem (opcional — aparece embaixo do embed)
-                <input name="imageUrl" placeholder="https://... .png/.jpg/.gif" />
+                Asset da imagem do painel (opcional)
+                <select name="imageAsset" data-image-asset-select>
+                  <option value="">Carregando imagens...</option>
+                </select>
               </label>
               <label>
-                Imagem do computador (opcional)
-                <input name="imageFile" type="file" accept="image/*" />
+                URL da imagem (opcional — aparece embaixo do embed)
+                <input name="imageUrl" placeholder="https://... .png/.jpg/.gif" />
               </label>
               <h3 style="margin-top:0.4rem;">Métodos disponíveis</h3>
               <div class="checkbox-row" id="precos-methods"></div>
@@ -449,8 +449,10 @@
                 <textarea name="content" placeholder="escreva o conteúdo do post"></textarea>
               </label>
               <label>
-                Imagem do computador (opcional)
-                <input name="imageFile" type="file" accept="image/*" />
+                Asset da imagem (opcional)
+                <select name="imageAsset" data-image-asset-select>
+                  <option value="">Carregando imagens...</option>
+                </select>
               </label>
               <label>
                 URL da imagem (opcional)

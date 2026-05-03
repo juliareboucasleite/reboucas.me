@@ -1,3 +1,4 @@
+const fs = require('node:fs');
 const path = require('node:path');
 const {
   AttachmentBuilder,
@@ -10,6 +11,51 @@ const {
 } = require('./jsonStore');
 
 const IMAGE_DIR = path.join(__dirname, '..', '..', 'frontend', 'images');
+
+function isImageFile(fileName) {
+  return /\.(png|jpe?g|gif|webp)$/i.test(fileName);
+}
+
+function listImageAssets() {
+  try {
+    return fs
+      .readdirSync(IMAGE_DIR)
+      .filter(isImageFile)
+      .sort((a, b) => a.localeCompare(b))
+      .map((fileName) => ({
+        value: fileName,
+        label: fileName.replace(/\.[^.]+$/, ''),
+      }));
+  } catch (_) {
+    return [];
+  }
+}
+
+function resolveImageAssetFilename(imageAsset) {
+  const value = String(imageAsset ?? '').trim();
+  if (!value) return null;
+
+  const aliases = {
+    welcome: 'Welcome.png',
+    goodbye: 'byebye.png',
+    logo: 'Logo.png',
+    prices: 'prices.png',
+  };
+
+  const aliased = aliases[value.toLowerCase()];
+  if (aliased && fs.existsSync(path.join(IMAGE_DIR, aliased))) return aliased;
+
+  const files = listImageAssets().map((asset) => asset.value);
+  const direct = files.find((fileName) => fileName === value || fileName.toLowerCase() === value.toLowerCase());
+  return direct ?? null;
+}
+
+function createImageFiles(imageAsset) {
+  const filename = resolveImageAssetFilename(imageAsset);
+  if (!filename) return [];
+
+  return [new AttachmentBuilder(path.join(IMAGE_DIR, filename), { name: filename })];
+}
 
 function getManagedGuildId(client, fallbackGuildId) {
   if (fallbackGuildId) return String(fallbackGuildId);
@@ -186,8 +232,8 @@ function buildCustomEmbed(payload, config) {
 
   if (payload.useLogo) embed.setThumbnail('attachment://Logo.png');
 
-  if (payload.imageAsset === 'welcome') embed.setImage('attachment://Welcome.png');
-  if (payload.imageAsset === 'goodbye') embed.setImage('attachment://byebye.png');
+  const imageFilename = resolveImageAssetFilename(payload.imageAsset);
+  if (imageFilename) embed.setImage(`attachment://${imageFilename}`);
 
   return embed;
 }
@@ -195,12 +241,7 @@ function buildCustomEmbed(payload, config) {
 function createEmbedFiles(imageAsset, useLogo) {
   const files = [];
 
-  if (imageAsset === 'welcome') {
-    files.push(new AttachmentBuilder(path.join(IMAGE_DIR, 'Welcome.png'), { name: 'Welcome.png' }));
-  }
-  if (imageAsset === 'goodbye') {
-    files.push(new AttachmentBuilder(path.join(IMAGE_DIR, 'byebye.png'), { name: 'byebye.png' }));
-  }
+  files.push(...createImageFiles(imageAsset));
   if (useLogo) {
     files.push(new AttachmentBuilder(path.join(IMAGE_DIR, 'Logo.png'), { name: 'Logo.png' }));
   }
@@ -227,9 +268,12 @@ async function sendCustomEmbed(client, guildId, payload) {
 module.exports = {
   buildMemberEmbed,
   createBrandFiles,
+  createImageFiles,
   getManagedGuildId,
   getManagedGuild,
   listGuildChannels,
+  listImageAssets,
+  resolveImageAssetFilename,
   sendLifecycleMessage,
   sendPanelLogToDiscord,
   sendCustomEmbed,

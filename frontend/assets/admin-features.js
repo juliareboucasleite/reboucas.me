@@ -26,22 +26,21 @@
     return data;
   }
 
-  function readFileAsDataUrl(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ''));
-      reader.onerror = () => reject(new Error('não foi possível ler o arquivo selecionado'));
-      reader.readAsDataURL(file);
-    });
-  }
+  async function popularImageAssets() {
+    try {
+      const assets = await api('api/admin/images');
+      const options = ['<option value="">Sem imagem</option>']
+        .concat(assets.map((asset) => `<option value="${escapeHtml(asset.value)}">${escapeHtml(asset.label)}</option>`))
+        .join('');
 
-  function readFileAsDataUrl(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(String(reader.result || ''));
-      reader.onerror = () => reject(new Error('não foi possível ler o arquivo selecionado'));
-      reader.readAsDataURL(file);
-    });
+      $$('select[data-image-asset-select]').forEach((sel) => {
+        const current = sel.value;
+        sel.innerHTML = options;
+        if (current) sel.value = current;
+      });
+    } catch (err) {
+      console.warn('[features] popular images falhou', err);
+    }
   }
 
   function toast(msg, isError = false) {
@@ -104,6 +103,8 @@
           forums.map((f) => `<option value="${f.id}">${escapeHtml(f.name)}</option>`).join('');
         if (cur) sel.value = cur;
       });
+
+      await popularImageAssets();
     } catch (err) {
       console.warn('[features] popular selects falhou', err);
     }
@@ -171,6 +172,7 @@
       form.elements.ticketCategoryId.value = p.ticketCategoryId ?? '';
       form.elements.title.value = p.title ?? '';
       form.elements.description.value = p.description ?? '';
+      if (form.elements.imageAsset) form.elements.imageAsset.value = p.imageAsset ?? '';
       if (form.elements.imageUrl) form.elements.imageUrl.value = p.imageUrl ?? '';
       renderMethods(p.methods);
     });
@@ -185,18 +187,6 @@
           label: String(fd.get(`label_${k}`) ?? '').trim() || k,
         };
       });
-
-      const imageFile = fd.get('imageFile');
-      const imageAttachment = imageFile instanceof File && imageFile.size > 0
-        ? (() => readFileAsDataUrl(imageFile).then((dataUrl) => {
-            const [, base64Part] = dataUrl.split(',', 2);
-            return {
-              name: imageFile.name || 'pawshop-prices.png',
-              type: imageFile.type || 'application/octet-stream',
-              data: base64Part || '',
-            };
-          }))()
-        : null;
       try {
         const atual = await api('api/admin/settings');
         await api('api/admin/settings', {
@@ -207,8 +197,9 @@
               ticketCategoryId: fd.get('ticketCategoryId'),
               title: fd.get('title'),
               description: fd.get('description'),
+              imageAsset: fd.get('imageAsset'),
               imageUrl: fd.get('imageUrl'),
-              imageAttachment: imageAttachment ? await imageAttachment : (atual.pricing?.imageAttachment ?? null),
+              imageAttachment: atual.pricing?.imageAttachment ?? null,
               methods,
             },
           }),
@@ -348,21 +339,7 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const fd = new FormData(form);
-      const payload = Object.fromEntries(fd.entries());
-
-      const file = fd.get('imageFile');
-      if (file instanceof File && file.size > 0) {
-        const dataUrl = await readFileAsDataUrl(file);
-        const [, base64Part] = dataUrl.split(',', 2);
-        payload.imageAttachment = {
-          name: file.name || 'forum-image.png',
-          type: file.type || 'application/octet-stream',
-          data: base64Part || '',
-        };
-      }
-
-      delete payload.imageFile;
+      const payload = Object.fromEntries(new FormData(form).entries());
       try {
         await api('api/admin/forum/post', { method: 'POST', body: JSON.stringify(payload) });
         toast('post enviado ✦');

@@ -16,7 +16,7 @@ const {
   removerGiveaway,
   adicionarLogAtividade,
 } = require('./jsonStore');
-const { getManagedGuild, getManagedGuildId } = require('./discordAdmin');
+const { createImageFiles, getManagedGuild, getManagedGuildId, resolveImageAssetFilename } = require('./discordAdmin');
 
 const IMAGE_DIR = path.join(__dirname, '..', '..', 'frontend', 'images');
 const PAYMENT_KEYS = ['robux', 'paypal', 'wise', 'stripe'];
@@ -91,13 +91,15 @@ function listMethodsEnabled(config) {
 function buildPrecosPanel(config) {
   const p = config.pricing ?? {};
   const enabled = listMethodsEnabled(config);
-  const attachment = p.imageAttachment?.data
-    ? {
+  const files = createImageFiles(p.imageAsset);
+  if (files.length === 0 && p.imageAttachment?.data) {
+    files.push(
+      new AttachmentBuilder(Buffer.from(p.imageAttachment.data, 'base64'), {
         name: p.imageAttachment.name || 'pawshop-prices.png',
-        type: p.imageAttachment.type || 'image/png',
-        data: p.imageAttachment.data,
-      }
-    : null;
+      }),
+    );
+  }
+  const imageFilename = resolveImageAssetFilename(p.imageAsset) || p.imageAttachment?.name || null;
 
   const embed = new EmbedBuilder()
     .setColor(config.appearance?.accentColor ?? '#f4cfe0')
@@ -111,8 +113,8 @@ function buildPrecosPanel(config) {
       })),
     );
 
-  if (attachment) {
-    embed.setImage(`attachment://${attachment.name}`);
+  if (files.length > 0 && imageFilename) {
+    embed.setImage(`attachment://${imageFilename}`);
   } else if (p.imageUrl) {
     embed.setImage(p.imageUrl);
   }
@@ -128,10 +130,6 @@ function buildPrecosPanel(config) {
   for (let i = 0; i < buttons.length; i += 5) {
     rows.push(new ActionRowBuilder().addComponents(buttons.slice(i, i + 5)));
   }
-
-  const files = attachment
-    ? [new AttachmentBuilder(Buffer.from(attachment.data, 'base64'), { name: attachment.name })]
-    : [];
 
   return { embeds: [embed], components: rows, files };
 }
@@ -386,13 +384,14 @@ async function listForumChannels(client, guildId) {
     .map((ch) => ({ id: ch.id, name: ch.name }));
 }
 
-async function postForumThread(client, { guildId, forumId, title, content, imageUrl, imageAttachment }) {
+async function postForumThread(client, { guildId, forumId, title, content, imageUrl, imageAsset, imageAttachment }) {
   const guild = await getManagedGuild(client, guildId);
   if (!guild) throw new Error('Guild não encontrada.');
   const forum = await guild.channels.fetch(forumId).catch(() => null);
   if (!forum || forum.type !== ChannelType.GuildForum) throw new Error('Canal de fórum inválido.');
 
   const files = [];
+  files.push(...createImageFiles(imageAsset));
   if (imageAttachment?.data) {
     try {
       files.push(

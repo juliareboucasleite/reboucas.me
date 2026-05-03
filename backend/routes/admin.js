@@ -18,6 +18,7 @@ const {
   getManagedGuild,
   getManagedGuildId,
   listGuildChannels,
+  listImageAssets,
   sendPanelLogToDiscord,
   sendCustomEmbed,
 } = require('../utils/discordAdmin');
@@ -97,6 +98,7 @@ function sanitizeSettings(body) {
       description:
         toText(current.pricing?.description) ||
         'choose a payment method to open a ticket with the staff.',
+      imageAsset: toText(current.pricing?.imageAsset),
       imageUrl: toText(current.pricing?.imageUrl),
       imageAttachment:
         current.pricing?.imageAttachment && typeof current.pricing.imageAttachment === 'object'
@@ -184,6 +186,10 @@ function criarAdminRouter(client) {
       settings,
       logs,
     });
+  });
+
+  router.get('/images', (req, res) => {
+    res.json(listImageAssets());
   });
 
   router.get('/produtos', (req, res) => {
@@ -493,7 +499,7 @@ function criarAdminRouter(client) {
       const guildId = getManagedGuildId(client);
       if (!guildId) return res.status(404).json({ erro: 'Guild não configurada.' });
 
-      const { forumId, title, content, imageUrl, imageAttachment } = req.body ?? {};
+      const { forumId, title, content, imageUrl, imageAsset, imageAttachment } = req.body ?? {};
       if (!forumId || !title) {
         return res.status(400).json({ erro: 'forumId e title obrigatórios.' });
       }
@@ -504,6 +510,7 @@ function criarAdminRouter(client) {
         title: toText(title),
         content: toText(content),
         imageUrl: toText(imageUrl),
+        imageAsset: toText(imageAsset),
         imageAttachment: imageAttachment && typeof imageAttachment === 'object' ? {
           name: toText(imageAttachment.name),
           type: toText(imageAttachment.type),

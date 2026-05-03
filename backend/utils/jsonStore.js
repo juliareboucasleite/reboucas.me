@@ -64,6 +64,7 @@ function criarConfigPadraoGuild() {
       ticketCategoryId: '',
       title: 'price list · pawshop',
       description: 'choose a payment method to open a ticket with the staff.',
+      imageAsset: '',
       imageUrl: '',
       imageAttachment: null,
       methods: {

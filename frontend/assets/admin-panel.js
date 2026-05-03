@@ -199,6 +199,23 @@ function fillChannelSelects() {
   });
 }
 
+async function fillImageAssetSelects() {
+  try {
+    const assets = await requestJson('api/admin/images');
+    const options = ['<option value="">Sem imagem</option>']
+      .concat(assets.map((asset) => `<option value="${escapeHtml(asset.value)}">${escapeHtml(asset.label)}</option>`))
+      .join('');
+
+    document.querySelectorAll('[data-image-asset-select]').forEach((select) => {
+      const previous = select.value;
+      select.innerHTML = options;
+      if (previous) select.value = previous;
+    });
+  } catch (error) {
+    console.warn('[admin] fillImageAssetSelects failed', error);
+  }
+}
+
 function populateSettingsForm() {
   const settings = state.settings;
   if (!settings) return;
@@ -342,6 +359,7 @@ async function loadDashboard() {
   state.products = await requestJson('api/admin/produtos');
 
   fillChannelSelects();
+  await fillImageAssetSelects();
   renderOverview();
   populateSettingsForm();
   renderProducts();
