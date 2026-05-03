@@ -45,7 +45,7 @@ function criarConfigPadraoGuild() {
       enabled: true,
       title: '୨ bye bye ୧',
       intro: 'it looks like {user} left us :c',
-      outro: 'come back soon! 🍼',
+      outro: 'come back soon! 🐾',
       memberCountText: 'we now have {memberCount} members...',
     },
     appearance: {
