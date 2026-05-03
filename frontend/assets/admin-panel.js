@@ -42,7 +42,10 @@ function escapeHtml(value) {
 }
 
 async function requestJson(url, options = {}) {
-  const response = await fetch(url, {
+  const resolvedUrl = String(url || '');
+  const fetchUrl = resolvedUrl.startsWith('/') || resolvedUrl.startsWith('http') ? resolvedUrl : `/${resolvedUrl}`;
+
+  const response = await fetch(fetchUrl, {
     headers: {
       'Content-Type': 'application/json',
       ...(options.headers ?? {}),
@@ -362,6 +365,7 @@ async function loadCurrentUser() {
 
 async function loadDashboard() {
   const payload = await requestJson('api/admin/dashboard');
+  console.debug('[admin] dashboard payload images:', payload.images);
   state.guild = payload.guild;
   state.stats = payload.stats;
   state.channels = payload.channels || [];

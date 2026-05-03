@@ -23,7 +23,10 @@
   }
 
   async function api(url, options = {}) {
-    const r = await fetch(url, {
+    const resolvedUrl = String(url || '');
+    const fetchUrl = resolvedUrl.startsWith('/') || resolvedUrl.startsWith('http') ? resolvedUrl : `/${resolvedUrl}`;
+
+    const r = await fetch(fetchUrl, {
       headers: { 'Content-Type': 'application/json', ...(options.headers ?? {}) },
       ...options,
     });
@@ -36,6 +39,7 @@
   async function popularImageAssets() {
     try {
       const assetsFromApi = await api('api/admin/dashboard').then((d) => d.images || []);
+      console.debug('[features] assetsFromApi:', assetsFromApi);
       const assets = [...DEFAULT_IMAGE_ASSETS, ...assetsFromApi].filter((asset, index, array) =>
         index === array.findIndex((item) => item.value === asset.value),
       );
