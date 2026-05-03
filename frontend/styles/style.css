@@ -306,6 +306,17 @@ p  { margin: 0; }
 [data-theme="dark"] .theme-toggle__icon--sun  { display: block; }
 [data-theme="dark"] .theme-toggle__icon--moon { display: none; }
 
+/* versão flutuante (usada na página de login) */
+.theme-toggle--floating {
+  position: fixed;
+  top: 1.4rem;
+  right: 1.4rem;
+  z-index: 60;
+  width: 44px;
+  height: 44px;
+  box-shadow: var(--shadow-soft);
+}
+
 /* ============================================================
    HERO
    ============================================================ */
