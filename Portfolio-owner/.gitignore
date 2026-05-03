@@ -1,0 +1,27 @@
+# Dependencies (se usar npm no futuro)
+node_modules/
+package-lock.json
+
+# Build
+*.css.map
+dist/
+build/
+
+# IDE / editor
+.vscode/
+.idea/
+.cursor/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment (nunca fazer commit de segredos)
+.env
+.env.*
+.env.local
+
+
