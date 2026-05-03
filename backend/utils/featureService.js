@@ -20,12 +20,6 @@ const { getManagedGuild, getManagedGuildId } = require('./discordAdmin');
 
 const IMAGE_DIR = path.join(__dirname, '..', '..', 'frontend', 'images');
 const PAYMENT_KEYS = ['robux', 'paypal', 'wise', 'stripe'];
-const PAYMENT_EMOJIS = {
-  robux: '💎',
-  paypal: '💙',
-  wise: '🌍',
-  stripe: '💳',
-};
 
 // ============================================================
 // VERIFICAÇÃO
@@ -104,7 +98,7 @@ function buildPrecosPanel(config) {
     .setDescription(p.description || 'choose a payment method to open a ticket with the staff.')
     .addFields(
       enabled.map((k) => ({
-        name: `${PAYMENT_EMOJIS[k]} ${p.methods?.[k]?.label ?? k}`,
+        name: p.methods?.[k]?.label ?? k,
         value: '​',
         inline: true,
       })),
@@ -116,8 +110,7 @@ function buildPrecosPanel(config) {
     new ButtonBuilder()
       .setCustomId(`paw:precos:${k}`)
       .setLabel(p.methods?.[k]?.label ?? k)
-      .setStyle(ButtonStyle.Primary)
-      .setEmoji(PAYMENT_EMOJIS[k]),
+      .setStyle(ButtonStyle.Primary),
   );
 
   const rows = [];
@@ -169,7 +162,7 @@ async function handlePrecosButton(interaction, method) {
       .setTitle(`pricing ticket — ${methodLabel}`)
       .setDescription(
         `hi <@${interaction.user.id}>! ✿\nthis is your private room with the staff.\n\n` +
-          `chosen method: **${methodLabel}** ${PAYMENT_EMOJIS[method]}\n\n` +
+          `chosen method: **${methodLabel}**\n\n` +
           `tell us what you'd like to buy (item, roblox link, quantity) and wait for someone to reply.`,
       );
 
@@ -378,13 +371,24 @@ async function listForumChannels(client, guildId) {
     .map((ch) => ({ id: ch.id, name: ch.name }));
 }
 
-async function postForumThread(client, { guildId, forumId, title, content, imageUrl }) {
+async function postForumThread(client, { guildId, forumId, title, content, imageUrl, imageAttachment }) {
   const guild = await getManagedGuild(client, guildId);
   if (!guild) throw new Error('Guild não encontrada.');
   const forum = await guild.channels.fetch(forumId).catch(() => null);
   if (!forum || forum.type !== ChannelType.GuildForum) throw new Error('Canal de fórum inválido.');
 
   const files = [];
+  if (imageAttachment?.data) {
+    try {
+      files.push(
+        new AttachmentBuilder(Buffer.from(imageAttachment.data, 'base64'), {
+          name: imageAttachment.name || 'pawshop-post.png',
+        }),
+      );
+    } catch (_) {
+      /* ignora se o anexo local for inválido */
+    }
+  }
   if (imageUrl) {
     try {
       files.push(new AttachmentBuilder(imageUrl, { name: 'pawshop-post.png' }));

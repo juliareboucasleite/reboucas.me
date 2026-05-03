@@ -26,6 +26,15 @@
     return data;
   }
 
+  function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(new Error('não foi possível ler o arquivo selecionado'));
+      reader.readAsDataURL(file);
+    });
+  }
+
   function toast(msg, isError = false) {
     let node = document.getElementById('admin-toast');
     if (!node) {
@@ -317,9 +326,23 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const fd = Object.fromEntries(new FormData(form).entries());
+      const fd = new FormData(form);
+      const payload = Object.fromEntries(fd.entries());
+
+      const file = fd.get('imageFile');
+      if (file instanceof File && file.size > 0) {
+        const dataUrl = await readFileAsDataUrl(file);
+        const [, base64Part] = dataUrl.split(',', 2);
+        payload.imageAttachment = {
+          name: file.name || 'forum-image.png',
+          type: file.type || 'application/octet-stream',
+          data: base64Part || '',
+        };
+      }
+
+      delete payload.imageFile;
       try {
-        await api('api/admin/forum/post', { method: 'POST', body: JSON.stringify(fd) });
+        await api('api/admin/forum/post', { method: 'POST', body: JSON.stringify(payload) });
         toast('post enviado ✦');
         form.reset();
         carregarForumPosts();
