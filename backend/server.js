@@ -5,15 +5,16 @@ const session = require('express-session');
 
 const authRoutes = require('./routes/auth');
 const portfolioRoutes = require('./routes/portfolio');
-const adminRoutes = require('./routes/admin');
+const { criarAdminRouter } = require('./routes/admin');
 const { getBasePath } = require('./utils/basePath');
 const { exigirAdmin } = require('./middleware/isAdmin');
 
-function criarServidor() {
+function criarServidor(client) {
   const app = express();
   const router = express.Router();
   const RAIZ = path.join(__dirname, '..');
   const basePath = getBasePath();
+  const adminRoutes = criarAdminRouter(client);
 
   function renderizarPagina(nomeArquivo) {
     const caminho = path.join(RAIZ, 'frontend', 'pages', nomeArquivo);

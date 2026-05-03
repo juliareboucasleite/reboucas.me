@@ -3,12 +3,12 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Painel · Pawshop</title>
+    <title>Admin · Pawshop</title>
     <base href="__BASE_PATH__/" />
     <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin />
     <link rel="stylesheet" href="styles/style.css" />
   </head>
-  <body>
+  <body class="admin-page">
     <header class="topo">
       <div class="topo__inner">
         <a class="logo" href=".">
@@ -16,125 +16,282 @@
           Pawshop
         </a>
         <nav class="nav">
-          <a class="nav__link" href=".">Portfolio</a>
-          <span class="nav__link" id="me" style="background: var(--mauve-faint);">…</span>
+          <a class="nav__link" href="..">Portfolio</a>
+          <a class="nav__link" href=".">Loja</a>
+          <span class="nav__link admin-user" id="me">...</span>
         </nav>
         <div class="actions">
-          <a class="btn btn--ghost" href=".">Voltar ao site</a>
+          <a class="btn btn--ghost" href=".">Ver loja</a>
           <a class="btn btn--outline" href="auth/logout">Sair</a>
         </div>
       </div>
     </header>
 
-    <main>
-      <section class="hero" style="padding-bottom: 1.5rem;">
-        <span class="eyebrow"><span class="dot"></span> Painel administrativo</span>
-        <h1>Gerencie o <em>catálogo.</em></h1>
-        <p>Adicione, edite ou remova produtos da loja Pawshop. As alterações aparecem ao vivo no portfolio.</p>
-      </section>
+    <main class="admin-shell">
+      <aside class="admin-sidebar">
+        <div class="admin-sidebar__card">
+          <span class="eyebrow"><span class="dot"></span> Admin center</span>
+          <h1>Painel Pawshop</h1>
+          <p>Gerencie catálogo, embeds, canais, automações de welcome/bye e logs do servidor.</p>
+        </div>
 
-      <div class="painel">
-        <section class="form">
-          <h2>+ Novo produto</h2>
-          <form id="form-novo">
-            <input name="nome" placeholder="Nome do produto" required />
-            <select name="categoria" required>
-              <option value="roupas">Roupas</option>
-              <option value="ugc">UGC</option>
-              <option value="bots">Bots</option>
-            </select>
-            <input name="preco" type="number" min="0" placeholder="Preço" required />
-            <select name="moeda">
-              <option value="robux">Robux</option>
-              <option value="brl">BRL</option>
-            </select>
-            <input name="link" placeholder="Link do produto (opcional)" />
-            <input name="imagem" placeholder="URL da imagem (opcional)" />
-            <textarea name="descricao" placeholder="Descrição curta (opcional)"></textarea>
-            <button type="submit">Adicionar ao catálogo</button>
-          </form>
+        <nav class="admin-menu">
+          <a href="#overview" class="admin-menu__link">Visão geral</a>
+          <a href="#catalog" class="admin-menu__link">Catálogo</a>
+          <a href="#automation" class="admin-menu__link">Welcome & Bye</a>
+          <a href="#embeds" class="admin-menu__link">Embeds</a>
+          <a href="#logs" class="admin-menu__link">Logs</a>
+        </nav>
+
+        <div class="admin-sidebar__meta" id="guild-meta">
+          <p>Conectando ao Discord...</p>
+        </div>
+      </aside>
+
+      <div class="admin-content">
+        <section id="overview" class="admin-section">
+          <div class="admin-section__head">
+            <div>
+              <span class="eyebrow">Status</span>
+              <h2>Visão geral</h2>
+            </div>
+            <button class="btn btn--outline" id="refresh-dashboard" type="button">Atualizar</button>
+          </div>
+
+          <div class="admin-stats" id="overview-stats"></div>
         </section>
 
-        <section class="lista-wrap">
-          <h2>Produtos no ar</h2>
-          <div id="lista" class="grid"></div>
+        <section id="catalog" class="admin-section">
+          <div class="admin-section__head">
+            <div>
+              <span class="eyebrow">Loja</span>
+              <h2>Catálogo</h2>
+            </div>
+          </div>
+
+          <div class="admin-grid admin-grid--catalog">
+            <section class="admin-card">
+              <h3>Adicionar produto</h3>
+              <form id="form-novo" class="stack-form">
+                <input name="nome" placeholder="Nome do produto" required />
+                <select name="categoria" required>
+                  <option value="roupas">Roupas</option>
+                  <option value="ugc">UGC</option>
+                  <option value="bots">Bots</option>
+                </select>
+                <input name="preco" type="number" min="0" placeholder="Preço" required />
+                <select name="moeda">
+                  <option value="robux">Robux</option>
+                  <option value="brl">BRL</option>
+                </select>
+                <input name="link" placeholder="Link do produto (opcional)" />
+                <input name="imagem" placeholder="URL da imagem (opcional)" />
+                <textarea name="descricao" placeholder="Descrição curta"></textarea>
+                <button type="submit" class="btn btn--primary">Adicionar ao catálogo</button>
+              </form>
+            </section>
+
+            <section class="admin-card">
+              <h3>Produtos no ar</h3>
+              <div id="lista" class="grid"></div>
+            </section>
+          </div>
+        </section>
+
+        <section id="automation" class="admin-section">
+          <div class="admin-section__head">
+            <div>
+              <span class="eyebrow">Discord</span>
+              <h2>Welcome, bye e canais</h2>
+            </div>
+            <div class="admin-actions-row">
+              <button class="btn btn--outline" id="preview-welcome" type="button">Preview welcome</button>
+              <button class="btn btn--outline" id="preview-goodbye" type="button">Preview bye</button>
+            </div>
+          </div>
+
+          <div class="admin-grid">
+            <section class="admin-card">
+              <h3>Configuração</h3>
+              <form id="settings-form" class="stack-form">
+                <div class="form-split">
+                  <label>
+                    Canal de welcome
+                    <select name="welcomeChannelId" data-channel-select></select>
+                  </label>
+                  <label>
+                    Canal de bye
+                    <select name="goodbyeChannelId" data-channel-select></select>
+                  </label>
+                </div>
+
+                <div class="form-split">
+                  <label>
+                    Canal de logs
+                    <select name="logsChannelId" data-channel-select></select>
+                  </label>
+                  <label>
+                    Canal padrão de embeds
+                    <select name="embedChannelId" data-channel-select></select>
+                  </label>
+                </div>
+
+                <div class="form-split">
+                  <label>
+                    Canal de tickets
+                    <select name="ticketChannelId" data-channel-select></select>
+                  </label>
+                  <label>
+                    Canal de preços
+                    <select name="pricesChannelId" data-channel-select></select>
+                  </label>
+                </div>
+
+                <div class="form-split">
+                  <label>
+                    Canal de info
+                    <select name="infoChannelId" data-channel-select></select>
+                  </label>
+                  <label>
+                    Canal de rules
+                    <select name="rulesChannelId" data-channel-select></select>
+                  </label>
+                </div>
+
+                <div class="form-split">
+                  <label>
+                    Cor principal
+                    <input name="accentColor" type="color" value="#f4cfe0" />
+                  </label>
+                  <label>
+                    Texto do autor
+                    <input name="authorName" placeholder="/pawshop" />
+                  </label>
+                </div>
+
+                <div class="checkbox-row">
+                  <label><input name="welcomeEnabled" type="checkbox" /> Welcome automático</label>
+                  <label><input name="goodbyeEnabled" type="checkbox" /> Bye automático</label>
+                </div>
+
+                <label>
+                  Título do welcome
+                  <input name="welcomeTitle" placeholder="welcome to {server}!" />
+                </label>
+                <label>
+                  Linha superior do welcome
+                  <input name="welcomeIntro" placeholder="— ————— ૮˶ᵔ ᵕ ᵔ˶ა ————— —" />
+                </label>
+                <label>
+                  Linha de verificação
+                  <input name="welcomeVerifyLine" placeholder="✦ verify in {rulesChannel} ✦" />
+                </label>
+                <label>
+                  Rodapé do welcome
+                  <input name="welcomeMemberCountText" placeholder="we now have {memberCount} members..." />
+                </label>
+
+                <label>
+                  Título do bye
+                  <input name="goodbyeTitle" placeholder="୨ bye bye ୧" />
+                </label>
+                <label>
+                  Texto do bye
+                  <input name="goodbyeIntro" placeholder="it looks like {user} left us :c" />
+                </label>
+                <label>
+                  Complemento do bye
+                  <input name="goodbyeOutro" placeholder="come back soon! 🍼" />
+                </label>
+                <label>
+                  Rodapé do bye
+                  <input name="goodbyeMemberCountText" placeholder="we now have {memberCount} members..." />
+                </label>
+
+                <button type="submit" class="btn btn--primary">Salvar configurações</button>
+              </form>
+            </section>
+
+            <section class="admin-card">
+              <h3>Preview visual</h3>
+              <div class="discord-preview-stack">
+                <article class="discord-card" id="welcome-preview-card"></article>
+                <article class="discord-card" id="goodbye-preview-card"></article>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section id="embeds" class="admin-section">
+          <div class="admin-section__head">
+            <div>
+              <span class="eyebrow">Broadcast</span>
+              <h2>Enviar embed manual</h2>
+            </div>
+          </div>
+
+          <section class="admin-card">
+            <form id="embed-form" class="stack-form">
+              <div class="form-split">
+                <label>
+                  Canal
+                  <select name="channelId" data-channel-select></select>
+                </label>
+                <label>
+                  Asset
+                  <select name="imageAsset">
+                    <option value="">Sem imagem especial</option>
+                    <option value="welcome">Welcome</option>
+                    <option value="goodbye">Byebye</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="form-split">
+                <label>
+                  Título
+                  <input name="title" placeholder="Atualização Pawshop" required />
+                </label>
+                <label>
+                  Cor
+                  <input name="color" type="color" value="#f4cfe0" />
+                </label>
+              </div>
+
+              <label>
+                Descrição
+                <textarea name="description" placeholder="Mensagem do embed" required></textarea>
+              </label>
+              <label>
+                Rodapé
+                <input name="footer" placeholder="Pawshop" />
+              </label>
+
+              <label class="checkbox-inline">
+                <input name="useLogo" type="checkbox" checked />
+                Usar logo da Pawshop na thumbnail
+              </label>
+
+              <button type="submit" class="btn btn--primary">Enviar embed</button>
+            </form>
+          </section>
+        </section>
+
+        <section id="logs" class="admin-section">
+          <div class="admin-section__head">
+            <div>
+              <span class="eyebrow">Histórico</span>
+              <h2>Logs administrativos</h2>
+            </div>
+          </div>
+
+          <section class="admin-card">
+            <div id="logs-list" class="logs-list"></div>
+          </section>
         </section>
       </div>
     </main>
 
-    <footer>
-      <div class="footer__inner">
-        <div class="footer__brand">
-          <a class="logo" href="."><span class="logo__paw"></span> Pawshop</a>
-          <p>Painel administrativo · staff only.</p>
-        </div>
-        <div class="footer__col">
-          <h4>Links</h4>
-          <a href=".">Portfolio</a>
-          <a href="auth/logout">Sair</a>
-        </div>
-      </div>
-      <div class="footer__bar">
-        <small>© 2026 Pawshop · painel</small>
-        <small>v1 · feito com <span class="heart">♡</span></small>
-      </div>
-    </footer>
-
-    <script>
-      const lista = document.getElementById('lista');
-      const meEl = document.getElementById('me');
-
-      fetch('api/me')
-        .then((r) => r.json())
-        .then((u) => {
-          meEl.textContent = u ? `★ ${u.global_name ?? u.username}` : '—';
-        });
-
-      async function carregar() {
-        const r = await fetch('api/admin/produtos');
-        const produtos = await r.json();
-        if (produtos.length === 0) {
-          lista.innerHTML = '<article class="card" data-empty>Nenhum produto cadastrado ainda.</article>';
-          return;
-        }
-        lista.innerHTML = produtos
-          .map(
-            (p) => `
-              <article class="card">
-                ${p.imagem ? `<img src="${p.imagem}" alt="${p.nome}" loading="lazy" />` : ''}
-                <span class="cat">${p.categoria}</span>
-                <h3>${p.nome}</h3>
-                <p class="preco">${p.preco} ${p.moeda}</p>
-                <button data-del="${p.id}">Remover</button>
-              </article>`,
-          )
-          .join('');
-        lista.querySelectorAll('button[data-del]').forEach((b) => {
-          b.addEventListener('click', async () => {
-            if (!confirm('Remover este produto?')) return;
-            await fetch(`api/admin/produtos/${b.dataset.del}`, { method: 'DELETE' });
-            carregar();
-          });
-        });
-      }
-
-      document.getElementById('form-novo').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const dados = Object.fromEntries(new FormData(e.target).entries());
-        const r = await fetch('api/admin/produtos', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(dados),
-        });
-        if (r.ok) {
-          e.target.reset();
-          carregar();
-        } else {
-          alert('Erro ao adicionar.');
-        }
-      });
-
-      carregar();
-    </script>
+    <script src="assets/admin-panel.js"></script>
   </body>
 </html>

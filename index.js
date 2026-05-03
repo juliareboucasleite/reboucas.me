@@ -6,7 +6,7 @@ const { carregarEventos } = require('./handlers/eventos');
 const { criarServidor } = require('./backend/server');
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds],
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
 });
 
 carregarComandos(client);
@@ -20,6 +20,6 @@ if (!process.env.DISCORD_TOKEN) {
 client.login(process.env.DISCORD_TOKEN);
 
 const porta = Number(process.env.PORTA) || 3000;
-criarServidor().listen(porta, () => {
+criarServidor(client).listen(porta, () => {
   console.log(`[web] rodando em http://localhost:${porta}`);
 });
