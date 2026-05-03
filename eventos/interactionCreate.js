@@ -1,9 +1,45 @@
 const { Events, MessageFlags } = require('discord.js');
 const { ehAdmin } = require('../backend/utils/jsonStore');
+const {
+  handleVerifyButton,
+  handlePrecosButton,
+  handleTicketClose,
+  handleGiveawayButton,
+} = require('../backend/utils/featureService');
 
 module.exports = {
   name: Events.InteractionCreate,
   async execute(interaction, client) {
+    // ----- BOTÕES -----
+    if (interaction.isButton()) {
+      const id = interaction.customId;
+      try {
+        if (id === 'paw:verify') return handleVerifyButton(interaction);
+        if (id === 'paw:ticket-close') return handleTicketClose(interaction);
+        if (id.startsWith('paw:precos:')) {
+          const method = id.split(':')[2];
+          return handlePrecosButton(interaction, method);
+        }
+        if (id.startsWith('paw:gw:')) {
+          const sorteioId = id.slice('paw:gw:'.length);
+          return handleGiveawayButton(interaction, sorteioId);
+        }
+      } catch (err) {
+        console.error(`[botão ${id}]`, err);
+        const resposta = {
+          content: 'algo deu errado ao processar essa ação.',
+          flags: MessageFlags.Ephemeral,
+        };
+        if (interaction.deferred || interaction.replied) {
+          await interaction.followUp(resposta).catch(() => {});
+        } else {
+          await interaction.reply(resposta).catch(() => {});
+        }
+      }
+      return;
+    }
+
+    // ----- SLASH COMMANDS -----
     if (!interaction.isChatInputCommand()) return;
 
     const comando = client.comandos.get(interaction.commandName);

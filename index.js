@@ -4,6 +4,7 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const { carregarComandos } = require('./handlers/comandos');
 const { carregarEventos } = require('./handlers/eventos');
 const { criarServidor } = require('./backend/server');
+const { startGiveawayTimer } = require('./backend/utils/featureService');
 
 const client = new Client({
   intents: [
@@ -22,6 +23,8 @@ if (!process.env.DISCORD_TOKEN) {
 }
 
 client.login(process.env.DISCORD_TOKEN);
+
+client.once('clientReady', () => startGiveawayTimer(client));
 
 const porta = Number(process.env.PORTA) || 3000;
 criarServidor(client).listen(porta, () => {

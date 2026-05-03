@@ -6,6 +6,10 @@ const {
   atualizarConfigGuild,
   lerLogsAtividade,
   adicionarLogAtividade,
+  lerGiveaways,
+  removerGiveaway,
+  lerForumPosts,
+  adicionarForumPost,
 } = require('../utils/jsonStore');
 const { exigirAdmin } = require('../middleware/isAdmin');
 const {
@@ -17,6 +21,15 @@ const {
   sendPanelLogToDiscord,
   sendCustomEmbed,
 } = require('../utils/discordAdmin');
+const {
+  buildVerifyPanel,
+  buildPrecosPanel,
+  criarSorteio,
+  encerrarSorteio,
+  listForumChannels,
+  postForumThread,
+  PAYMENT_KEYS,
+} = require('../utils/featureService');
 
 function getActor(req) {
   const user = req.session?.usuario;
@@ -69,6 +82,29 @@ function sanitizeSettings(body) {
     appearance: {
       accentColor: toText(current.appearance?.accentColor) || '#f4cfe0',
       authorName: toText(current.appearance?.authorName) || '/pawshop',
+    },
+    verification: {
+      roleId: toText(current.verification?.roleId),
+      title: toText(current.verification?.title) || 'verifique-se',
+      description:
+        toText(current.verification?.description) ||
+        'aperte no botão abaixo pra desbloquear o resto do servidor (｡•ᴗ•｡)',
+      buttonLabel: toText(current.verification?.buttonLabel) || 'verificar',
+    },
+    pricing: {
+      ticketCategoryId: toText(current.pricing?.ticketCategoryId),
+      title: toText(current.pricing?.title) || 'tabela de preços · pawshop',
+      description:
+        toText(current.pricing?.description) ||
+        'escolha a forma de pagamento e abra um ticket com a staff.',
+      methods: PAYMENT_KEYS.reduce((acc, k) => {
+        const m = current.pricing?.methods?.[k] ?? {};
+        acc[k] = {
+          enabled: toBool(m.enabled, true),
+          label: toText(m.label) || k.charAt(0).toUpperCase() + k.slice(1),
+        };
+        return acc;
+      }, {}),
     },
   };
 }
@@ -290,6 +326,194 @@ function criarAdminRouter(client) {
       res.json({ ok: true, channelId: sent.channelId, messageId: sent.id });
     } catch (error) {
       res.status(400).json({ erro: error.message });
+    }
+  });
+
+  // ---------- ROLES (helper para o painel de verificação) ----------
+  router.get('/roles', async (req, res) => {
+    const guild = await getManagedGuild(client);
+    if (!guild) return res.json([]);
+    await guild.roles.fetch();
+    const roles = guild.roles.cache
+      .filter((r) => !r.managed && r.id !== guild.id)
+      .sort((a, b) => b.position - a.position)
+      .map((r) => ({ id: r.id, name: r.name, color: r.hexColor }));
+    res.json(roles);
+  });
+
+  // ---------- CATEGORIAS (para parent dos tickets) ----------
+  router.get('/categories', async (req, res) => {
+    const guild = await getManagedGuild(client);
+    if (!guild) return res.json([]);
+    await guild.channels.fetch();
+    const cats = guild.channels.cache
+      .filter((ch) => ch.type === 4) // ChannelType.GuildCategory
+      .sort((a, b) => a.position - b.position)
+      .map((ch) => ({ id: ch.id, name: ch.name }));
+    res.json(cats);
+  });
+
+  // ---------- VERIFICAÇÃO ----------
+  router.post('/verify/post', async (req, res) => {
+    try {
+      const guildId = getManagedGuildId(client);
+      if (!guildId) return res.status(404).json({ erro: 'Guild não configurada.' });
+
+      const channelId = toText(req.body?.channelId);
+      if (!channelId) return res.status(400).json({ erro: 'channelId obrigatório.' });
+
+      const guild = await getManagedGuild(client, guildId);
+      const channel = await guild.channels.fetch(channelId).catch(() => null);
+      if (!channel?.isTextBased()) return res.status(400).json({ erro: 'Canal inválido.' });
+
+      const config = lerConfigGuild(guildId);
+      if (!config.verification?.roleId) {
+        return res.status(400).json({ erro: 'Configure um cargo de verificação primeiro.' });
+      }
+
+      const sent = await channel.send(buildVerifyPanel(config));
+      await registrarLogPainel(req, client, guildId, {
+        type: 'verify.posted',
+        title: 'Painel de verificação postado',
+        message: `Postado em <#${channelId}>.`,
+      });
+
+      res.json({ ok: true, channelId, messageId: sent.id });
+    } catch (err) {
+      res.status(400).json({ erro: err.message });
+    }
+  });
+
+  // ---------- PRECOS / TICKETS ----------
+  router.post('/precos/post', async (req, res) => {
+    try {
+      const guildId = getManagedGuildId(client);
+      if (!guildId) return res.status(404).json({ erro: 'Guild não configurada.' });
+
+      const channelId = toText(req.body?.channelId);
+      if (!channelId) return res.status(400).json({ erro: 'channelId obrigatório.' });
+
+      const guild = await getManagedGuild(client, guildId);
+      const channel = await guild.channels.fetch(channelId).catch(() => null);
+      if (!channel?.isTextBased()) return res.status(400).json({ erro: 'Canal inválido.' });
+
+      const config = lerConfigGuild(guildId);
+      const sent = await channel.send(buildPrecosPanel(config));
+      await registrarLogPainel(req, client, guildId, {
+        type: 'precos.posted',
+        title: 'Painel de preços postado',
+        message: `Postado em <#${channelId}>.`,
+      });
+      res.json({ ok: true, channelId, messageId: sent.id });
+    } catch (err) {
+      res.status(400).json({ erro: err.message });
+    }
+  });
+
+  // ---------- SORTEIOS ----------
+  router.get('/sorteios', (req, res) => {
+    const guildId = getManagedGuildId(client);
+    const todos = lerGiveaways().filter((s) => !guildId || s.guildId === guildId);
+    res.json(todos);
+  });
+
+  router.post('/sorteios', async (req, res) => {
+    try {
+      const guildId = getManagedGuildId(client);
+      if (!guildId) return res.status(404).json({ erro: 'Guild não configurada.' });
+
+      const { channelId, premio, vencedores, duracaoMinutos } = req.body ?? {};
+      if (!channelId || !premio || !duracaoMinutos) {
+        return res.status(400).json({ erro: 'channelId, premio e duracaoMinutos são obrigatórios.' });
+      }
+
+      const sorteio = await criarSorteio(client, {
+        guildId,
+        channelId: toText(channelId),
+        premio: toText(premio),
+        vencedores: Math.max(1, Number(vencedores) || 1),
+        duracaoMs: Math.max(60_000, Number(duracaoMinutos) * 60_000),
+        criadoPor: req.session?.usuario?.id,
+      });
+
+      await registrarLogPainel(req, client, guildId, {
+        type: 'giveaway.created',
+        title: 'Sorteio criado',
+        message: `${sorteio.premio} · termina em ${duracaoMinutos}min`,
+      });
+
+      res.status(201).json(sorteio);
+    } catch (err) {
+      res.status(400).json({ erro: err.message });
+    }
+  });
+
+  router.post('/sorteios/:id/finalizar', async (req, res) => {
+    const id = req.params.id;
+    const sorteio = lerGiveaways().find((s) => s.id === id);
+    if (!sorteio || sorteio.status !== 'ativo') {
+      return res.status(404).json({ erro: 'Sorteio não encontrado ou já encerrado.' });
+    }
+    const finalizado = await encerrarSorteio(client, sorteio);
+    await registrarLogPainel(req, client, getManagedGuildId(client), {
+      type: 'giveaway.ended.manual',
+      title: 'Sorteio encerrado pelo painel',
+      message: `${sorteio.premio}`,
+    });
+    res.json(finalizado);
+  });
+
+  router.delete('/sorteios/:id', (req, res) => {
+    const ok = removerGiveaway(req.params.id);
+    res.json({ ok });
+  });
+
+  // ---------- FORUM ----------
+  router.get('/forum/channels', async (req, res) => {
+    const channels = await listForumChannels(client);
+    res.json(channels);
+  });
+
+  router.get('/forum/posts', (req, res) => {
+    res.json(lerForumPosts(40));
+  });
+
+  router.post('/forum/post', async (req, res) => {
+    try {
+      const guildId = getManagedGuildId(client);
+      if (!guildId) return res.status(404).json({ erro: 'Guild não configurada.' });
+
+      const { forumId, title, content, imageUrl } = req.body ?? {};
+      if (!forumId || !title) {
+        return res.status(400).json({ erro: 'forumId e title obrigatórios.' });
+      }
+
+      const result = await postForumThread(client, {
+        guildId,
+        forumId: toText(forumId),
+        title: toText(title),
+        content: toText(content),
+        imageUrl: toText(imageUrl),
+      });
+
+      const entry = adicionarForumPost({
+        guildId,
+        forumId: toText(forumId),
+        title: toText(title),
+        threadId: result.threadId,
+        url: result.url,
+        actor: getActor(req),
+      });
+
+      await registrarLogPainel(req, client, guildId, {
+        type: 'forum.posted',
+        title: 'Post de fórum criado',
+        message: `${title} · ${result.url}`,
+      });
+
+      res.status(201).json(entry);
+    } catch (err) {
+      res.status(400).json({ erro: err.message });
     }
   });
 

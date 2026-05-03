@@ -58,6 +58,10 @@
           <a href="#catalog" class="admin-menu__link">Catálogo</a>
           <a href="#automation" class="admin-menu__link">Welcome & Bye</a>
           <a href="#embeds" class="admin-menu__link">Embeds</a>
+          <a href="#verify" class="admin-menu__link">Verificação</a>
+          <a href="#precos" class="admin-menu__link">Ticket de preços</a>
+          <a href="#sorteios" class="admin-menu__link">Sorteios</a>
+          <a href="#forum" class="admin-menu__link">Fórum</a>
           <a href="#logs" class="admin-menu__link">Logs</a>
         </nav>
 
@@ -295,6 +299,160 @@
           </section>
         </section>
 
+        <section id="verify" class="admin-section">
+          <div class="admin-section__head">
+            <div>
+              <span class="eyebrow">Acesso</span>
+              <h2>Verificação</h2>
+            </div>
+          </div>
+          <section class="admin-card">
+            <form id="verify-form" class="stack-form">
+              <div class="form-split">
+                <label>
+                  Cargo a entregar
+                  <select name="roleId" data-role-select></select>
+                </label>
+                <label>
+                  Texto do botão
+                  <input name="buttonLabel" placeholder="verificar" />
+                </label>
+              </div>
+              <label>
+                Título do painel
+                <input name="title" placeholder="verifique-se" />
+              </label>
+              <label>
+                Descrição
+                <textarea name="description" placeholder="aperte no botão pra desbloquear..."></textarea>
+              </label>
+              <button type="submit" class="btn btn--primary">Salvar verificação</button>
+            </form>
+          </section>
+          <section class="admin-card">
+            <h3>Postar painel num canal</h3>
+            <form id="verify-post-form" class="stack-form">
+              <label>
+                Canal
+                <select name="channelId" data-channel-select></select>
+              </label>
+              <button type="submit" class="btn btn--outline">Postar agora</button>
+            </form>
+          </section>
+        </section>
+
+        <section id="precos" class="admin-section">
+          <div class="admin-section__head">
+            <div>
+              <span class="eyebrow">Loja</span>
+              <h2>Ticket de preços</h2>
+            </div>
+          </div>
+          <section class="admin-card">
+            <form id="precos-form" class="stack-form">
+              <label>
+                Categoria pra abrir tickets
+                <select name="ticketCategoryId" data-category-select></select>
+              </label>
+              <div class="form-split">
+                <label>
+                  Título do painel
+                  <input name="title" placeholder="tabela de preços" />
+                </label>
+                <label>
+                  Descrição
+                  <input name="description" placeholder="escolha o pagamento" />
+                </label>
+              </div>
+              <h3 style="margin-top:0.4rem;">Métodos disponíveis</h3>
+              <div class="checkbox-row" id="precos-methods"></div>
+              <button type="submit" class="btn btn--primary">Salvar preços</button>
+            </form>
+          </section>
+          <section class="admin-card">
+            <h3>Postar painel num canal</h3>
+            <form id="precos-post-form" class="stack-form">
+              <label>
+                Canal
+                <select name="channelId" data-channel-select></select>
+              </label>
+              <button type="submit" class="btn btn--outline">Postar agora</button>
+            </form>
+          </section>
+        </section>
+
+        <section id="sorteios" class="admin-section">
+          <div class="admin-section__head">
+            <div>
+              <span class="eyebrow">Comunidade</span>
+              <h2>Sorteios</h2>
+            </div>
+            <button class="btn btn--outline" id="refresh-giveaways" type="button">Atualizar</button>
+          </div>
+          <section class="admin-card">
+            <h3>Criar sorteio</h3>
+            <form id="giveaway-form" class="stack-form">
+              <label>
+                Canal
+                <select name="channelId" data-channel-select required></select>
+              </label>
+              <div class="form-split">
+                <label>
+                  Prêmio
+                  <input name="premio" placeholder="ex: avatar UGC" required />
+                </label>
+                <label>
+                  Vencedores
+                  <input name="vencedores" type="number" min="1" max="20" value="1" />
+                </label>
+              </div>
+              <label>
+                Duração (em minutos)
+                <input name="duracaoMinutos" type="number" min="1" value="60" required />
+              </label>
+              <button type="submit" class="btn btn--primary">Criar sorteio</button>
+            </form>
+          </section>
+          <section class="admin-card">
+            <h3>Sorteios ativos</h3>
+            <div id="giveaways-list" class="logs-list"></div>
+          </section>
+        </section>
+
+        <section id="forum" class="admin-section">
+          <div class="admin-section__head">
+            <div>
+              <span class="eyebrow">Conteúdo</span>
+              <h2>Postar no fórum</h2>
+            </div>
+          </div>
+          <section class="admin-card">
+            <form id="forum-form" class="stack-form">
+              <label>
+                Canal de fórum
+                <select name="forumId" data-forum-select required></select>
+              </label>
+              <label>
+                Título da thread
+                <input name="title" placeholder="ex: novo drop · roupinha rosa" required />
+              </label>
+              <label>
+                Mensagem
+                <textarea name="content" placeholder="escreva o conteúdo do post"></textarea>
+              </label>
+              <label>
+                URL da imagem (opcional)
+                <input name="imageUrl" placeholder="https://..." />
+              </label>
+              <button type="submit" class="btn btn--primary">Postar no fórum</button>
+            </form>
+          </section>
+          <section class="admin-card">
+            <h3>Posts recentes</h3>
+            <div id="forum-list" class="logs-list"></div>
+          </section>
+        </section>
+
         <section id="logs" class="admin-section">
           <div class="admin-section__head">
             <div>
@@ -311,6 +469,7 @@
     </main>
 
     <script src="assets/admin-panel.js"></script>
+    <script src="assets/admin-features.js"></script>
     <script>
       (function () {
         const root = document.documentElement;
