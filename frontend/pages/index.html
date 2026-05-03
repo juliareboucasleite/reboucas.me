@@ -3,76 +3,122 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Pawshop · zine de Roblox</title>
+    <title>Pawshop · Loja Roblox</title>
     <base href="__BASE_PATH__/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="styles/style.css" />
   </head>
   <body>
-    <div class="ticker" aria-hidden="true">
-      <div class="ticker__track">
-        <span>PAWSHOP <span class="ticker__dot"></span> ROBLOX FITS &amp; UGC &amp; BOTS</span>
-        <span>EST. 2025 <span class="ticker__dot"></span> SHIPPING WORLDWIDE.RBX</span>
-        <span>PAWSHOP <span class="ticker__dot"></span> ROBLOX FITS &amp; UGC &amp; BOTS</span>
-        <span>EST. 2025 <span class="ticker__dot"></span> SHIPPING WORLDWIDE.RBX</span>
-        <span>PAWSHOP <span class="ticker__dot"></span> ROBLOX FITS &amp; UGC &amp; BOTS</span>
-      </div>
-    </div>
-
+    <!-- ⚠️ troque o link do grupo abaixo (3 lugares) pelo URL da sua comunidade no Roblox -->
     <header class="topo">
-      <div class="topo__row">
-        <span>// edição nº 001 — outono · primavera</span>
+      <div class="topo__inner">
+        <a class="logo" href=".">
+          <span class="logo__paw" aria-hidden="true"></span>
+          Pawshop
+        </a>
         <nav class="nav">
-          <a href="#catalogo">Catálogo</a>
-          <a href="login">Painel admin</a>
+          <a class="nav__link" href="#catalogo">Catálogo</a>
+          <a class="nav__link" href="#sobre">Sobre</a>
+          <a class="nav__link" href="https://www.roblox.com/communities/0/Pawshop" target="_blank" rel="noopener">Comunidade</a>
         </nav>
+        <div class="actions">
+          <a class="btn btn--ghost" href="login">Painel</a>
+          <a class="btn btn--primary" href="https://www.roblox.com/communities/0/Pawshop" target="_blank" rel="noopener">
+            Entrar no grupo
+          </a>
+        </div>
       </div>
-
-      <h1>
-        <span class="word">PAW</span><span class="word word--shop">shop</span>
-      </h1>
-
-      <p class="topo__sub">Roupas — UGC — Bots — para o seu Roblox</p>
-
-      <span class="paw paw--magenta paw--big" style="top: 14%; right: 6%; transform: rotate(-18deg);"></span>
-      <span class="paw" style="bottom: 18%; left: 4%; width: 70px; height: 70px; transform: rotate(22deg);"></span>
-      <span class="sticker sticker--lime" style="top: 18%; left: 6%; --r: -8deg; transform: rotate(-8deg);">★ Roblox Drop</span>
-      <span class="sticker sticker--magenta" style="bottom: 8%; right: 8%; --r: 12deg; transform: rotate(12deg);">handmade pra vc</span>
     </header>
 
     <main>
-      <div class="section-label">
-        <span class="section-label__num">01 / Catálogo</span>
-        <span class="section-label__title">tudo o que está rolando agora</span>
-        <span class="section-label__rule"></span>
-      </div>
-
-      <section class="filtros" aria-label="Filtros de categoria">
-        <button data-cat="" class="is-active">Todos</button>
-        <button data-cat="roupas">Roupas</button>
-        <button data-cat="ugc">UGC</button>
-        <button data-cat="bots">Bots</button>
+      <section class="hero">
+        <span class="eyebrow"><span class="dot"></span> Loja Roblox · drops semanais</span>
+        <h1>Tudo que seu Roblox <em>queria.</em></h1>
+        <p>
+          Roupas, UGC e bots feitos com carinho — entregues direto no seu avatar.
+          Junte-se à comunidade Pawshop e fique por dentro de cada lançamento.
+        </p>
+        <div class="hero__cta">
+          <a class="btn btn--primary btn--lg" href="#catalogo">Ver catálogo</a>
+          <a class="btn btn--outline btn--lg" href="https://www.roblox.com/communities/0/Pawshop" target="_blank" rel="noopener">
+            Entrar no grupo →
+          </a>
+        </div>
       </section>
 
-      <section id="catalogo" class="grid"></section>
+      <section id="catalogo" class="catalogo">
+        <div class="catalogo__head">
+          <h2>Catálogo</h2>
+          <div class="filtros" role="tablist" aria-label="Categorias">
+            <button class="is-active" data-cat="">Todos</button>
+            <button data-cat="roupas">Roupas</button>
+            <button data-cat="ugc">UGC</button>
+            <button data-cat="bots">Bots</button>
+          </div>
+        </div>
+        <div id="grid-produtos" class="grid"></div>
+      </section>
     </main>
 
+    <a class="badge-circle"
+       href="https://www.roblox.com/communities/0/Pawshop"
+       target="_blank"
+       rel="noopener"
+       aria-label="Entrar no grupo Pawshop no Roblox">
+      <svg class="badge-circle__ring" viewBox="0 0 200 200" aria-hidden="true">
+        <defs>
+          <path id="ring-path" d="M 100 100 m -72 0 a 72 72 0 1 1 144 0 a 72 72 0 1 1 -144 0" />
+        </defs>
+        <text>
+          <textPath href="#ring-path">ENTRAR NO GRUPO · PAWSHOP · ENTRAR NO GRUPO · PAWSHOP · </textPath>
+        </text>
+      </svg>
+      <span class="badge-circle__center" aria-hidden="true"></span>
+    </a>
+
     <footer>
-      <small>© Pawshop <span class="heart">♥</span> ROBLOX shop</small>
-      <small>made by paws, for paws</small>
+      <div class="footer__inner">
+        <div class="footer__brand">
+          <a class="logo" href=".">
+            <span class="logo__paw" aria-hidden="true"></span>
+            Pawshop
+          </a>
+          <p>Loja Roblox de roupas, UGC e bots — feita com carinho por pessoas que jogam.</p>
+        </div>
+        <div class="footer__col">
+          <h4>Loja</h4>
+          <a href="#catalogo">Catálogo</a>
+          <a href="#catalogo" data-cat-link="roupas">Roupas</a>
+          <a href="#catalogo" data-cat-link="ugc">UGC</a>
+          <a href="#catalogo" data-cat-link="bots">Bots</a>
+        </div>
+        <div class="footer__col">
+          <h4>Comunidade</h4>
+          <a href="https://www.roblox.com/communities/0/Pawshop" target="_blank" rel="noopener">Grupo Roblox</a>
+          <a href="#sobre">Sobre nós</a>
+        </div>
+        <div class="footer__col">
+          <h4>Conta</h4>
+          <a href="login">Painel admin</a>
+        </div>
+      </div>
+      <div class="footer__bar">
+        <small>© 2026 Pawshop · todos os direitos reservados</small>
+        <small>feito com <span class="heart">♡</span> para os bichinhos do Roblox</small>
+      </div>
     </footer>
 
     <script>
-      const grid = document.getElementById('catalogo');
-      const botoes = document.querySelectorAll('.filtros button');
+      const grid = document.getElementById('grid-produtos');
+      const filtros = document.querySelectorAll('.filtros button');
 
       async function carregar(categoria = '') {
         const url = categoria ? `api/produtos?categoria=${categoria}` : 'api/produtos';
         const r = await fetch(url);
         const { produtos } = await r.json();
         if (produtos.length === 0) {
-          grid.innerHTML = '<article class="card" data-empty>Nenhum produto ainda. Volte logo ✿</article>';
+          grid.innerHTML = '<article class="card" data-empty>Nenhum produto por enquanto. Volte logo ✿</article>';
           return;
         }
         grid.innerHTML = produtos
@@ -80,7 +126,7 @@
             (p) => `
               <article class="card">
                 ${p.imagem ? `<img src="${p.imagem}" alt="${p.nome}" loading="lazy" />` : ''}
-                <p class="cat">${p.categoria}</p>
+                <span class="cat">${p.categoria}</span>
                 <h3>${p.nome}</h3>
                 <p>${p.descricao ?? ''}</p>
                 <p class="preco">${p.preco} ${p.moeda}</p>
@@ -90,11 +136,22 @@
           .join('');
       }
 
-      botoes.forEach((b) => {
+      filtros.forEach((b) => {
         b.addEventListener('click', () => {
-          botoes.forEach((x) => x.classList.remove('is-active'));
+          filtros.forEach((x) => x.classList.remove('is-active'));
           b.classList.add('is-active');
           carregar(b.dataset.cat);
+        });
+      });
+
+      // links do footer "roupas/ugc/bots" filtram + scrollam pro catálogo
+      document.querySelectorAll('[data-cat-link]').forEach((a) => {
+        a.addEventListener('click', (e) => {
+          e.preventDefault();
+          const cat = a.dataset.catLink;
+          const alvo = document.querySelector(`.filtros button[data-cat="${cat}"]`);
+          if (alvo) alvo.click();
+          document.getElementById('catalogo').scrollIntoView({ behavior: 'smooth' });
         });
       });
 

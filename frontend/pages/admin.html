@@ -3,48 +3,40 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Bullpen · Pawshop</title>
+    <title>Painel · Pawshop</title>
     <base href="__BASE_PATH__/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="styles/style.css" />
   </head>
   <body>
-    <div class="ticker" aria-hidden="true">
-      <div class="ticker__track">
-        <span>BULLPEN <span class="ticker__dot"></span> EDIÇÃO INTERNA — STAFF ONLY</span>
-        <span>PAWSHOP <span class="ticker__dot"></span> CATALOG MGMT v1</span>
-        <span>BULLPEN <span class="ticker__dot"></span> EDIÇÃO INTERNA — STAFF ONLY</span>
-        <span>PAWSHOP <span class="ticker__dot"></span> CATALOG MGMT v1</span>
-      </div>
-    </div>
-
     <header class="topo">
-      <div class="topo__row">
-        <span>// painel admin · catálogo</span>
+      <div class="topo__inner">
+        <a class="logo" href=".">
+          <span class="logo__paw" aria-hidden="true"></span>
+          Pawshop
+        </a>
         <nav class="nav">
-          <span id="me">…</span>
-          <a href=".">Portfolio</a>
-          <a href="auth/logout">Sair</a>
+          <a class="nav__link" href=".">Portfolio</a>
+          <span class="nav__link" id="me" style="background: var(--mauve-faint);">…</span>
         </nav>
+        <div class="actions">
+          <a class="btn btn--ghost" href=".">Voltar ao site</a>
+          <a class="btn btn--outline" href="auth/logout">Sair</a>
+        </div>
       </div>
-
-      <h1><span class="word">BULL</span><span class="word word--shop">pen</span></h1>
-      <p class="topo__sub">Edite o catálogo · Adicione novos drops · Sem mistério</p>
-
-      <span class="paw paw--lime" style="top: 22%; right: 8%; width: 80px; height: 80px; transform: rotate(15deg);"></span>
     </header>
 
     <main>
-      <div class="section-label">
-        <span class="section-label__num">A / catálogo</span>
-        <span class="section-label__title">administração de produtos</span>
-        <span class="section-label__rule"></span>
-      </div>
+      <section class="hero" style="padding-bottom: 1.5rem;">
+        <span class="eyebrow"><span class="dot"></span> Painel administrativo</span>
+        <h1>Gerencie o <em>catálogo.</em></h1>
+        <p>Adicione, edite ou remova produtos da loja Pawshop. As alterações aparecem ao vivo no portfolio.</p>
+      </section>
 
       <div class="painel">
         <section class="form">
-          <h2>Adicionar produto</h2>
+          <h2>+ Novo produto</h2>
           <form id="form-novo">
             <input name="nome" placeholder="Nome do produto" required />
             <select name="categoria" required>
@@ -60,11 +52,11 @@
             <input name="link" placeholder="Link do produto (opcional)" />
             <input name="imagem" placeholder="URL da imagem (opcional)" />
             <textarea name="descricao" placeholder="Descrição curta (opcional)"></textarea>
-            <button type="submit">+ Adicionar ao catálogo</button>
+            <button type="submit">Adicionar ao catálogo</button>
           </form>
         </section>
 
-        <section>
+        <section class="lista-wrap">
           <h2>Produtos no ar</h2>
           <div id="lista" class="grid"></div>
         </section>
@@ -72,8 +64,21 @@
     </main>
 
     <footer>
-      <small>© Pawshop · staff only</small>
-      <small>bullpen v1 — pawshop.rbx</small>
+      <div class="footer__inner">
+        <div class="footer__brand">
+          <a class="logo" href="."><span class="logo__paw"></span> Pawshop</a>
+          <p>Painel administrativo · staff only.</p>
+        </div>
+        <div class="footer__col">
+          <h4>Links</h4>
+          <a href=".">Portfolio</a>
+          <a href="auth/logout">Sair</a>
+        </div>
+      </div>
+      <div class="footer__bar">
+        <small>© 2026 Pawshop · painel</small>
+        <small>v1 · feito com <span class="heart">♡</span></small>
+      </div>
     </footer>
 
     <script>
@@ -83,22 +88,22 @@
       fetch('api/me')
         .then((r) => r.json())
         .then((u) => {
-          if (u) meEl.textContent = `★ ${u.global_name ?? u.username}`;
-          else meEl.textContent = '—';
+          meEl.textContent = u ? `★ ${u.global_name ?? u.username}` : '—';
         });
 
       async function carregar() {
         const r = await fetch('api/admin/produtos');
         const produtos = await r.json();
         if (produtos.length === 0) {
-          lista.innerHTML = '<article class="card" data-empty>Nenhum produto cadastrado.</article>';
+          lista.innerHTML = '<article class="card" data-empty>Nenhum produto cadastrado ainda.</article>';
           return;
         }
         lista.innerHTML = produtos
           .map(
             (p) => `
               <article class="card">
-                <p class="cat">${p.categoria}</p>
+                ${p.imagem ? `<img src="${p.imagem}" alt="${p.nome}" loading="lazy" />` : ''}
+                <span class="cat">${p.categoria}</span>
                 <h3>${p.nome}</h3>
                 <p class="preco">${p.preco} ${p.moeda}</p>
                 <button data-del="${p.id}">Remover</button>
