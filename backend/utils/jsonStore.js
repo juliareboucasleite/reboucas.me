@@ -5,6 +5,8 @@ const DIR = path.join(__dirname, '..', '..', 'data');
 const ARQ_PRODUTOS = path.join(DIR, 'produtos.json');
 const ARQ_ADMINS = path.join(DIR, 'admins.json');
 const ARQ_DISCORD = path.join(DIR, 'discord.json');
+const ARQ_GIVEAWAYS = path.join(DIR, 'giveaways.json');
+const ARQ_FORUM_LOG = path.join(DIR, 'forumPosts.json');
 
 function lerJson(caminho, padrao) {
   try {
@@ -51,6 +53,23 @@ function criarConfigPadraoGuild() {
     appearance: {
       accentColor: '#f4cfe0',
       authorName: '/pawshop',
+    },
+    verification: {
+      roleId: '',
+      title: 'verifique-se',
+      description: 'aperte no botão abaixo pra desbloquear o resto do servidor (｡•ᴗ•｡)',
+      buttonLabel: 'verificar',
+    },
+    pricing: {
+      ticketCategoryId: '',
+      title: 'tabela de preços · pawshop',
+      description: 'escolha a forma de pagamento e abra um ticket com a staff.',
+      methods: {
+        robux: { enabled: true, label: 'Robux' },
+        paypal: { enabled: true, label: 'PayPal' },
+        wise: { enabled: true, label: 'Wise' },
+        stripe: { enabled: true, label: 'Stripe' },
+      },
     },
   };
 }
@@ -140,6 +159,55 @@ function ehAdmin(userId) {
   return lerAdmins().includes(String(userId));
 }
 
+// ---------- giveaways ----------
+function lerGiveaways() {
+  return lerJson(ARQ_GIVEAWAYS, { sorteios: [] }).sorteios ?? [];
+}
+
+function salvarGiveaways(sorteios) {
+  salvarJson(ARQ_GIVEAWAYS, { sorteios });
+}
+
+function adicionarGiveaway(sorteio) {
+  const todos = lerGiveaways();
+  todos.push(sorteio);
+  salvarGiveaways(todos);
+  return sorteio;
+}
+
+function atualizarGiveaway(id, parcial) {
+  const todos = lerGiveaways();
+  const idx = todos.findIndex((s) => s.id === id);
+  if (idx === -1) return null;
+  todos[idx] = { ...todos[idx], ...parcial };
+  salvarGiveaways(todos);
+  return todos[idx];
+}
+
+function removerGiveaway(id) {
+  const todos = lerGiveaways();
+  const restantes = todos.filter((s) => s.id !== id);
+  salvarGiveaways(restantes);
+  return todos.length !== restantes.length;
+}
+
+// ---------- forum log ----------
+function lerForumPosts(limite = 50) {
+  return lerJson(ARQ_FORUM_LOG, { posts: [] }).posts.slice(0, limite);
+}
+
+function adicionarForumPost(entry) {
+  const dados = lerJson(ARQ_FORUM_LOG, { posts: [] });
+  dados.posts.unshift({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    createdAt: new Date().toISOString(),
+    ...entry,
+  });
+  dados.posts = dados.posts.slice(0, 100);
+  salvarJson(ARQ_FORUM_LOG, dados);
+  return dados.posts[0];
+}
+
 module.exports = {
   lerProdutos,
   salvarProdutos,
@@ -150,4 +218,11 @@ module.exports = {
   atualizarConfigGuild,
   lerLogsAtividade,
   adicionarLogAtividade,
+  lerGiveaways,
+  salvarGiveaways,
+  adicionarGiveaway,
+  atualizarGiveaway,
+  removerGiveaway,
+  lerForumPosts,
+  adicionarForumPost,
 };
