@@ -110,6 +110,8 @@ function buildPrecosPanel(config) {
       })),
     );
 
+  if (p.imageUrl) embed.setImage(p.imageUrl);
+
   const buttons = enabled.map((k) =>
     new ButtonBuilder()
       .setCustomId(`paw:precos:${k}`)

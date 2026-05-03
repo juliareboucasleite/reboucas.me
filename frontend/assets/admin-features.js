@@ -153,6 +153,7 @@
       form.elements.ticketCategoryId.value = p.ticketCategoryId ?? '';
       form.elements.title.value = p.title ?? '';
       form.elements.description.value = p.description ?? '';
+      if (form.elements.imageUrl) form.elements.imageUrl.value = p.imageUrl ?? '';
       renderMethods(p.methods);
     });
 
@@ -176,6 +177,7 @@
               ticketCategoryId: fd.get('ticketCategoryId'),
               title: fd.get('title'),
               description: fd.get('description'),
+              imageUrl: fd.get('imageUrl'),
               methods,
             },
           }),

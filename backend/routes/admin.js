@@ -97,6 +97,7 @@ function sanitizeSettings(body) {
       description:
         toText(current.pricing?.description) ||
         'choose a payment method to open a ticket with the staff.',
+      imageUrl: toText(current.pricing?.imageUrl),
       methods: PAYMENT_KEYS.reduce((acc, k) => {
         const m = current.pricing?.methods?.[k] ?? {};
         acc[k] = {
