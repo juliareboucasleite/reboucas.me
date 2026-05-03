@@ -8,7 +8,7 @@ const { lerConfigGuild } = require('../../backend/utils/jsonStore');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('goodbye-preview')
-    .setDescription('[Admin] Envia um preview da mensagem de saida neste canal.'),
+    .setDescription('[Admin] Send a goodbye message preview in this channel.'),
   async execute(interaction) {
     const config = lerConfigGuild(interaction.guildId);
     const embed = buildMemberEmbed(
@@ -25,7 +25,7 @@ module.exports = {
     });
 
     await interaction.reply({
-      content: 'Preview de bye enviado neste canal.',
+      content: 'Goodbye preview sent in this channel.',
       flags: MessageFlags.Ephemeral,
     });
   },

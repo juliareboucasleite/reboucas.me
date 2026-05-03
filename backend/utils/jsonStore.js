@@ -56,14 +56,14 @@ function criarConfigPadraoGuild() {
     },
     verification: {
       roleId: '',
-      title: 'verifique-se',
-      description: 'aperte no botão abaixo pra desbloquear o resto do servidor (｡•ᴗ•｡)',
-      buttonLabel: 'verificar',
+      title: 'verify yourself',
+      description: 'click the button below to unlock the rest of the server (｡•ᴗ•｡)',
+      buttonLabel: 'verify',
     },
     pricing: {
       ticketCategoryId: '',
-      title: 'tabela de preços · pawshop',
-      description: 'escolha a forma de pagamento e abra um ticket com a staff.',
+      title: 'price list · pawshop',
+      description: 'choose a payment method to open a ticket with the staff.',
       methods: {
         robux: { enabled: true, label: 'Robux' },
         paypal: { enabled: true, label: 'PayPal' },

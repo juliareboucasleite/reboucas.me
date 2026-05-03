@@ -3,9 +3,9 @@ const { SlashCommandBuilder } = require('discord.js');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('ping')
-    .setDescription('Mostra a latência do bot.'),
+    .setDescription('Show the bot latency.'),
   async execute(interaction) {
-    const enviado = await interaction.reply({ content: 'Medindo...', fetchReply: true });
+    const enviado = await interaction.reply({ content: 'Measuring...', fetchReply: true });
     const latencia = enviado.createdTimestamp - interaction.createdTimestamp;
     await interaction.editReply(
       `Pong! \`${latencia}ms\` · API \`${Math.round(interaction.client.ws.ping)}ms\``,

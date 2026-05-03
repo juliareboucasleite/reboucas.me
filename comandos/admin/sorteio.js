@@ -18,24 +18,24 @@ function parseDuracao(input) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('sorteio')
-    .setDescription('[Admin] Gerenciar sorteios.')
+    .setDescription('[Admin] Manage giveaways.')
     .addSubcommand((sc) =>
       sc
         .setName('criar')
-        .setDescription('Cria um novo sorteio neste canal.')
+        .setDescription('Create a new giveaway in this channel.')
         .addStringOption((op) =>
-          op.setName('premio').setDescription('O que é o prêmio?').setRequired(true),
+          op.setName('premio').setDescription('What is the prize?').setRequired(true),
         )
         .addStringOption((op) =>
           op
             .setName('duracao')
-            .setDescription('Quanto dura? ex: 10m, 2h, 1d')
+            .setDescription('How long? e.g. 10m, 2h, 1d')
             .setRequired(true),
         )
         .addIntegerOption((op) =>
           op
             .setName('vencedores')
-            .setDescription('Quantos vencedores? (padrão 1)')
+            .setDescription('How many winners? (default 1)')
             .setMinValue(1)
             .setMaxValue(20),
         ),
@@ -43,12 +43,12 @@ module.exports = {
     .addSubcommand((sc) =>
       sc
         .setName('finalizar')
-        .setDescription('Finaliza um sorteio agora e sorteia ganhadores.')
+        .setDescription('End a giveaway right now and pick winners.')
         .addStringOption((op) =>
-          op.setName('id').setDescription('ID do sorteio').setRequired(true),
+          op.setName('id').setDescription('Giveaway ID').setRequired(true),
         ),
     )
-    .addSubcommand((sc) => sc.setName('listar').setDescription('Lista sorteios ativos.')),
+    .addSubcommand((sc) => sc.setName('listar').setDescription('List active giveaways.')),
 
   async execute(interaction, client) {
     const sub = interaction.options.getSubcommand();
@@ -61,7 +61,7 @@ module.exports = {
       const duracaoMs = parseDuracao(duracaoStr);
       if (!duracaoMs || duracaoMs < 5_000) {
         return interaction.reply({
-          content: 'duração inválida. exemplos: `30s`, `10m`, `2h`, `1d`.',
+          content: 'invalid duration. examples: `30s`, `10m`, `2h`, `1d`.',
           flags: MessageFlags.Ephemeral,
         });
       }
@@ -76,12 +76,12 @@ module.exports = {
           criadoPor: interaction.user.id,
         });
         return interaction.reply({
-          content: `sorteio criado · id \`${sorteio.id}\``,
+          content: `giveaway created · id \`${sorteio.id}\``,
           flags: MessageFlags.Ephemeral,
         });
       } catch (err) {
         return interaction.reply({
-          content: `erro ao criar sorteio: ${err.message}`,
+          content: `couldn't create giveaway: ${err.message}`,
           flags: MessageFlags.Ephemeral,
         });
       }
@@ -93,13 +93,13 @@ module.exports = {
       const sorteio = todos.find((s) => s.id === id);
       if (!sorteio || sorteio.status !== 'ativo') {
         return interaction.reply({
-          content: 'sorteio não encontrado ou já encerrado.',
+          content: 'giveaway not found or already ended.',
           flags: MessageFlags.Ephemeral,
         });
       }
       await encerrarSorteio(client, sorteio);
       return interaction.reply({
-        content: 'sorteio encerrado ✦',
+        content: 'giveaway ended ✦',
         flags: MessageFlags.Ephemeral,
       });
     }
@@ -110,14 +110,14 @@ module.exports = {
       );
       if (ativos.length === 0) {
         return interaction.reply({
-          content: 'nenhum sorteio ativo no momento.',
+          content: 'no active giveaways right now.',
           flags: MessageFlags.Ephemeral,
         });
       }
       const lista = ativos
         .map(
           (s) =>
-            `• \`${s.id}\` — **${s.premio}** · ${s.participantes.length} participantes · termina <t:${Math.floor(
+            `• \`${s.id}\` — **${s.premio}** · ${s.participantes.length} entries · ends <t:${Math.floor(
               new Date(s.termina).getTime() / 1000,
             )}:R>`,
         )

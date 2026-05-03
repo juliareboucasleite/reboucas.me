@@ -5,12 +5,12 @@ const { lerConfigGuild } = require('../../backend/utils/jsonStore');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('precos')
-    .setDescription('[Admin] Posta o painel de tabela de preços no canal atual.'),
+    .setDescription('[Admin] Post the price list panel in the current channel.'),
   async execute(interaction) {
     const config = lerConfigGuild(interaction.guildId);
     await interaction.channel.send(buildPrecosPanel(config));
     await interaction.reply({
-      content: 'painel de preços postado ✦',
+      content: 'price panel posted ✦',
       flags: MessageFlags.Ephemeral,
     });
   },

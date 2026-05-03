@@ -85,18 +85,18 @@ function sanitizeSettings(body) {
     },
     verification: {
       roleId: toText(current.verification?.roleId),
-      title: toText(current.verification?.title) || 'verifique-se',
+      title: toText(current.verification?.title) || 'verify yourself',
       description:
         toText(current.verification?.description) ||
-        'aperte no botão abaixo pra desbloquear o resto do servidor (｡•ᴗ•｡)',
-      buttonLabel: toText(current.verification?.buttonLabel) || 'verificar',
+        'click the button below to unlock the rest of the server (｡•ᴗ•｡)',
+      buttonLabel: toText(current.verification?.buttonLabel) || 'verify',
     },
     pricing: {
       ticketCategoryId: toText(current.pricing?.ticketCategoryId),
-      title: toText(current.pricing?.title) || 'tabela de preços · pawshop',
+      title: toText(current.pricing?.title) || 'price list · pawshop',
       description:
         toText(current.pricing?.description) ||
-        'escolha a forma de pagamento e abra um ticket com a staff.',
+        'choose a payment method to open a ticket with the staff.',
       methods: PAYMENT_KEYS.reduce((acc, k) => {
         const m = current.pricing?.methods?.[k] ?? {};
         acc[k] = {
@@ -204,8 +204,8 @@ function criarAdminRouter(client) {
     if (guildId) {
       await registrarLogPainel(req, client, guildId, {
         type: 'catalog.product.created',
-        title: 'Produto criado',
-        message: `${novo.nome} foi adicionado ao catalogo.`,
+        title: 'Product created',
+        message: `${novo.nome} was added to the catalog.`,
       });
     }
 
@@ -223,8 +223,8 @@ function criarAdminRouter(client) {
     if (guildId) {
       await registrarLogPainel(req, client, guildId, {
         type: 'catalog.product.updated',
-        title: 'Produto atualizado',
-        message: `${produtos[idx].nome} foi atualizado no painel.`,
+        title: 'Product updated',
+        message: `${produtos[idx].nome} was updated from the panel.`,
       });
     }
 
@@ -244,8 +244,8 @@ function criarAdminRouter(client) {
     if (guildId && removido) {
       await registrarLogPainel(req, client, guildId, {
         type: 'catalog.product.deleted',
-        title: 'Produto removido',
-        message: `${removido.nome} foi removido do catalogo.`,
+        title: 'Product removed',
+        message: `${removido.nome} was removed from the catalog.`,
       });
     }
 
@@ -265,8 +265,8 @@ function criarAdminRouter(client) {
     const settings = atualizarConfigGuild(guildId, sanitizeSettings(req.body));
     await registrarLogPainel(req, client, guildId, {
       type: 'settings.updated',
-      title: 'Configuracoes salvas',
-      message: 'Welcome, bye, canais e aparencia foram atualizados.',
+      title: 'Settings saved',
+      message: 'Welcome, bye, channels and appearance were updated.',
     });
     res.json(settings);
   });
@@ -294,8 +294,8 @@ function criarAdminRouter(client) {
 
       await registrarLogPainel(req, client, guildId, {
         type: 'embed.sent',
-        title: 'Embed enviado',
-        message: `Embed manual enviado para <#${sent.channelId}>.`,
+        title: 'Embed sent',
+        message: `Manual embed sent to <#${sent.channelId}>.`,
       });
 
       res.json({ ok: true, channelId: sent.channelId, messageId: sent.id });
@@ -319,8 +319,8 @@ function criarAdminRouter(client) {
 
       await registrarLogPainel(req, client, guildId, {
         type: 'welcome.preview.sent',
-        title: 'Preview de welcome enviado',
-        message: `Preview enviado para <#${sent.channelId}>.`,
+        title: 'Welcome preview sent',
+        message: `Preview sent to <#${sent.channelId}>.`,
       });
 
       res.json({ ok: true, channelId: sent.channelId, messageId: sent.id });
@@ -374,8 +374,8 @@ function criarAdminRouter(client) {
       const sent = await channel.send(buildVerifyPanel(config));
       await registrarLogPainel(req, client, guildId, {
         type: 'verify.posted',
-        title: 'Painel de verificação postado',
-        message: `Postado em <#${channelId}>.`,
+        title: 'Verification panel posted',
+        message: `Posted in <#${channelId}>.`,
       });
 
       res.json({ ok: true, channelId, messageId: sent.id });
@@ -401,8 +401,8 @@ function criarAdminRouter(client) {
       const sent = await channel.send(buildPrecosPanel(config));
       await registrarLogPainel(req, client, guildId, {
         type: 'precos.posted',
-        title: 'Painel de preços postado',
-        message: `Postado em <#${channelId}>.`,
+        title: 'Price panel posted',
+        message: `Posted in <#${channelId}>.`,
       });
       res.json({ ok: true, channelId, messageId: sent.id });
     } catch (err) {
@@ -438,8 +438,8 @@ function criarAdminRouter(client) {
 
       await registrarLogPainel(req, client, guildId, {
         type: 'giveaway.created',
-        title: 'Sorteio criado',
-        message: `${sorteio.premio} · termina em ${duracaoMinutos}min`,
+        title: 'Giveaway created',
+        message: `${sorteio.premio} · ends in ${duracaoMinutos}min`,
       });
 
       res.status(201).json(sorteio);
@@ -457,7 +457,7 @@ function criarAdminRouter(client) {
     const finalizado = await encerrarSorteio(client, sorteio);
     await registrarLogPainel(req, client, getManagedGuildId(client), {
       type: 'giveaway.ended.manual',
-      title: 'Sorteio encerrado pelo painel',
+      title: 'Giveaway ended from panel',
       message: `${sorteio.premio}`,
     });
     res.json(finalizado);
@@ -507,7 +507,7 @@ function criarAdminRouter(client) {
 
       await registrarLogPainel(req, client, guildId, {
         type: 'forum.posted',
-        title: 'Post de fórum criado',
+        title: 'Forum post created',
         message: `${title} · ${result.url}`,
       });
 
@@ -532,8 +532,8 @@ function criarAdminRouter(client) {
 
       await registrarLogPainel(req, client, guildId, {
         type: 'goodbye.preview.sent',
-        title: 'Preview de bye enviado',
-        message: `Preview enviado para <#${sent.channelId}>.`,
+        title: 'Bye preview sent',
+        message: `Preview sent to <#${sent.channelId}>.`,
       });
 
       res.json({ ok: true, channelId: sent.channelId, messageId: sent.id });

@@ -34,13 +34,13 @@ function buildVerifyPanel(config) {
   const v = config.verification ?? {};
   const embed = new EmbedBuilder()
     .setColor(config.appearance?.accentColor ?? '#f4cfe0')
-    .setTitle(v.title || 'verifique-se')
-    .setDescription(v.description || 'aperte no botão abaixo pra desbloquear o resto do servidor.');
+    .setTitle(v.title || 'verify yourself')
+    .setDescription(v.description || 'click the button below to unlock the rest of the server (｡•ᴗ•｡)');
 
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId('paw:verify')
-      .setLabel(v.buttonLabel || 'verificar')
+      .setLabel(v.buttonLabel || 'verify')
       .setStyle(ButtonStyle.Success)
       .setEmoji('🐾'),
   );
@@ -53,34 +53,34 @@ async function handleVerifyButton(interaction) {
   const roleId = config.verification?.roleId;
   if (!roleId) {
     return interaction.reply({
-      content: 'Verificação ainda não configurada — peça pra um admin definir o cargo no painel.',
+      content: 'verification is not set up yet — ask an admin to configure the role in the panel.',
       ephemeral: true,
     });
   }
 
   const member = interaction.member;
   if (member.roles.cache.has(roleId)) {
-    return interaction.reply({ content: 'você já está verificado, fofura ✿', ephemeral: true });
+    return interaction.reply({ content: "you're already verified, cutie ✿", ephemeral: true });
   }
 
   try {
-    await member.roles.add(roleId, 'Verificação Pawshop via botão');
+    await member.roles.add(roleId, 'Pawshop verification via button');
     await interaction.reply({
-      content: '✦ verificado com sucesso! aproveite o servidor (｡•ᴗ•｡)',
+      content: '✦ verified successfully! enjoy the server (｡•ᴗ•｡)',
       ephemeral: true,
     });
     adicionarLogAtividade({
       guildId: interaction.guildId,
       type: 'verify.granted',
       source: 'bot',
-      title: 'Membro verificado',
-      message: `${interaction.user.tag} clicou em verificar.`,
+      title: 'Member verified',
+      message: `${interaction.user.tag} clicked verify.`,
       meta: { userId: interaction.user.id, roleId },
     });
   } catch (err) {
     console.error('[verify]', err);
     await interaction.reply({
-      content: 'não consegui te dar o cargo. avisa um admin pra checar minhas permissões.',
+      content: "couldn't give you the role. ping an admin to check my permissions.",
       ephemeral: true,
     });
   }
@@ -100,8 +100,8 @@ function buildPrecosPanel(config) {
 
   const embed = new EmbedBuilder()
     .setColor(config.appearance?.accentColor ?? '#f4cfe0')
-    .setTitle(p.title || 'tabela de preços · pawshop')
-    .setDescription(p.description || 'escolha a forma de pagamento e abra um ticket com a staff.')
+    .setTitle(p.title || 'price list · pawshop')
+    .setDescription(p.description || 'choose a payment method to open a ticket with the staff.')
     .addFields(
       enabled.map((k) => ({
         name: `${PAYMENT_EMOJIS[k]} ${p.methods?.[k]?.label ?? k}`,
@@ -157,38 +157,38 @@ async function handlePrecosButton(interaction, method) {
     const closeRow = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId('paw:ticket-close')
-        .setLabel('fechar ticket')
+        .setLabel('close ticket')
         .setStyle(ButtonStyle.Danger)
         .setEmoji('🔒'),
     );
 
     const embed = new EmbedBuilder()
       .setColor(config.appearance?.accentColor ?? '#f4cfe0')
-      .setTitle(`ticket de preços — ${methodLabel}`)
+      .setTitle(`pricing ticket — ${methodLabel}`)
       .setDescription(
-        `oi <@${interaction.user.id}>! ✿\nessa é a sua sala privada com a staff.\n\n` +
-          `método escolhido: **${methodLabel}** ${PAYMENT_EMOJIS[method]}\n\n` +
-          `me conta o que você quer comprar (item, link do roblox, quantidade) e aguarde alguém responder.`,
+        `hi <@${interaction.user.id}>! ✿\nthis is your private room with the staff.\n\n` +
+          `chosen method: **${methodLabel}** ${PAYMENT_EMOJIS[method]}\n\n` +
+          `tell us what you'd like to buy (item, roblox link, quantity) and wait for someone to reply.`,
       );
 
     await channel.send({ content: `<@${interaction.user.id}>`, embeds: [embed], components: [closeRow] });
 
     await interaction.editReply({
-      content: `ticket aberto: <#${channel.id}> — fala com a gente lá ✦`,
+      content: `ticket opened: <#${channel.id}> — chat with us there ✦`,
     });
 
     adicionarLogAtividade({
       guildId: guild.id,
       type: 'ticket.opened',
       source: 'bot',
-      title: 'Ticket de preços aberto',
-      message: `${interaction.user.tag} escolheu ${methodLabel}.`,
+      title: 'Pricing ticket opened',
+      message: `${interaction.user.tag} chose ${methodLabel}.`,
       meta: { userId: interaction.user.id, channelId: channel.id, method },
     });
   } catch (err) {
     console.error('[precos]', err);
     await interaction.editReply({
-      content: 'não consegui criar o ticket. peça pra um admin checar as permissões / categoria.',
+      content: "couldn't create the ticket. ask an admin to check the bot permissions / category.",
     });
   }
 }
@@ -196,7 +196,7 @@ async function handlePrecosButton(interaction, method) {
 async function handleTicketClose(interaction) {
   const channel = interaction.channel;
   if (!channel) return;
-  await interaction.reply({ content: 'fechando o ticket em 5s ⏳' });
+  await interaction.reply({ content: 'closing the ticket in 5s ⏳' });
   setTimeout(() => channel.delete().catch(() => {}), 5000);
 }
 
@@ -207,25 +207,25 @@ function buildGiveawayEmbed(sorteio, config, status = 'ativo') {
   const accent = config.appearance?.accentColor ?? '#f4cfe0';
   const embed = new EmbedBuilder()
     .setColor(accent)
-    .setTitle(`🎉 sorteio · ${sorteio.premio}`);
+    .setTitle(`🎉 giveaway · ${sorteio.premio}`);
 
   if (status === 'ativo') {
     embed
       .setDescription(
-        `aperte no botão pra entrar!\n\n**vencedores:** ${sorteio.vencedores}\n**termina:** <t:${Math.floor(
+        `click the button to enter!\n\n**winners:** ${sorteio.vencedores}\n**ends:** <t:${Math.floor(
           new Date(sorteio.termina).getTime() / 1000,
-        )}:R>\n**participantes:** ${sorteio.participantes.length}`,
+        )}:R>\n**entries:** ${sorteio.participantes.length}`,
       )
       .setFooter({ text: `id · ${sorteio.id}` });
   } else if (status === 'encerrado') {
     const lista = (sorteio.ganhadores ?? []).map((id) => `<@${id}>`).join(', ');
     embed
       .setDescription(
-        `**finalizado!**\n\n${
-          lista ? `parabéns ${lista} ✿` : 'ninguém entrou nesse sorteio :('
-        }\n\n${sorteio.participantes.length} participaram.`,
+        `**ended!**\n\n${
+          lista ? `congrats ${lista} ✿` : 'nobody entered this giveaway :('
+        }\n\n${sorteio.participantes.length} entered.`,
       )
-      .setFooter({ text: `encerrado · id ${sorteio.id}` });
+      .setFooter({ text: `ended · id ${sorteio.id}` });
   }
 
   return embed;
@@ -236,7 +236,7 @@ function buildGiveawayPanel(sorteio, config) {
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
       .setCustomId(`paw:gw:${sorteio.id}`)
-      .setLabel('entrar')
+      .setLabel('enter')
       .setStyle(ButtonStyle.Primary)
       .setEmoji('🎉'),
   );
@@ -247,18 +247,18 @@ async function handleGiveawayButton(interaction, sorteioId) {
   const todos = lerGiveaways();
   const sorteio = todos.find((s) => s.id === sorteioId);
   if (!sorteio || sorteio.status !== 'ativo') {
-    return interaction.reply({ content: 'esse sorteio não está mais ativo.', ephemeral: true });
+    return interaction.reply({ content: "this giveaway isn't active anymore.", ephemeral: true });
   }
 
   const userId = interaction.user.id;
   if (sorteio.participantes.includes(userId)) {
-    return interaction.reply({ content: 'você já está participando ✿', ephemeral: true });
+    return interaction.reply({ content: "you're already entered ✿", ephemeral: true });
   }
 
   sorteio.participantes.push(userId);
   atualizarGiveaway(sorteio.id, { participantes: sorteio.participantes });
 
-  await interaction.reply({ content: '🎉 inscrito no sorteio! boa sorte ✦', ephemeral: true });
+  await interaction.reply({ content: '🎉 entered! good luck ✦', ephemeral: true });
 
   // atualiza embed com novo total
   try {
@@ -303,8 +303,8 @@ async function encerrarSorteio(client, sorteio) {
       const mention = ganhadores.map((id) => `<@${id}>`).join(', ');
       await channel.send({
         content: ganhadores.length
-          ? `🎉 parabéns ${mention}! vocês ganharam **${sorteio.premio}** — falem com a staff pra retirar.`
-          : `o sorteio de **${sorteio.premio}** terminou sem participantes :(`,
+          ? `🎉 congrats ${mention}! you won **${sorteio.premio}** — DM the staff to claim.`
+          : `the **${sorteio.premio}** giveaway ended with no entries :(`,
       });
     }
   } catch (err) {
@@ -315,8 +315,8 @@ async function encerrarSorteio(client, sorteio) {
     guildId: sorteio.guildId,
     type: 'giveaway.ended',
     source: 'bot',
-    title: 'Sorteio encerrado',
-    message: `${sorteio.premio} · ${ganhadores.length} ganhador(es)`,
+    title: 'Giveaway ended',
+    message: `${sorteio.premio} · ${ganhadores.length} winner(s)`,
     meta: { sorteioId: sorteio.id, ganhadores },
   });
 

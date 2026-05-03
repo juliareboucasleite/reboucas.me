@@ -5,13 +5,13 @@ const config = require('../../config/config.json');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('catalogo')
-    .setDescription('Mostra os produtos da Pawshop.')
+    .setDescription('Show the Pawshop catalog.')
     .addStringOption((op) =>
       op
         .setName('categoria')
-        .setDescription('Filtra por categoria')
+        .setDescription('Filter by category')
         .addChoices(
-          { name: 'Roupas', value: 'roupas' },
+          { name: 'Clothes', value: 'roupas' },
           { name: 'UGC', value: 'ugc' },
           { name: 'Bots', value: 'bots' },
         ),
@@ -22,19 +22,19 @@ module.exports = {
     const lista = filtro ? todos.filter((p) => p.categoria === filtro) : todos;
 
     if (lista.length === 0) {
-      return interaction.reply({ content: 'Nenhum produto encontrado.', ephemeral: true });
+      return interaction.reply({ content: 'No products found.', ephemeral: true });
     }
 
     const embed = new EmbedBuilder()
-      .setTitle(`Catálogo · ${config.loja.nome}`)
-      .setDescription(filtro ? `Categoria: **${filtro}**` : 'Todos os produtos disponíveis.')
+      .setTitle(`Catalog · ${config.loja.nome}`)
+      .setDescription(filtro ? `Category: **${filtro}**` : 'All available products.')
       .setColor(config.loja.cor)
       .setFooter({ text: config.loja.descricao });
 
     for (const p of lista.slice(0, 25)) {
       embed.addFields({
         name: `${p.nome} — ${p.preco} ${p.moeda}`,
-        value: `${p.descricao}\n${p.link ? `[Ver no Roblox](${p.link})` : ''}`,
+        value: `${p.descricao}\n${p.link ? `[View on Roblox](${p.link})` : ''}`,
       });
     }
 

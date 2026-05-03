@@ -4,33 +4,33 @@ const { lerProdutos, salvarProdutos } = require('../../backend/utils/jsonStore')
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('addproduto')
-    .setDescription('[Admin] Adiciona um produto ao catálogo.')
-    .addStringOption((op) => op.setName('nome').setDescription('Nome do produto').setRequired(true))
+    .setDescription('[Admin] Add a product to the catalog.')
+    .addStringOption((op) => op.setName('nome').setDescription('Product name').setRequired(true))
     .addStringOption((op) =>
       op
         .setName('categoria')
-        .setDescription('Categoria')
+        .setDescription('Category')
         .setRequired(true)
         .addChoices(
-          { name: 'Roupas', value: 'roupas' },
+          { name: 'Clothes', value: 'roupas' },
           { name: 'UGC', value: 'ugc' },
           { name: 'Bots', value: 'bots' },
         ),
     )
     .addIntegerOption((op) =>
-      op.setName('preco').setDescription('Preço').setRequired(true).setMinValue(0),
+      op.setName('preco').setDescription('Price').setRequired(true).setMinValue(0),
     )
     .addStringOption((op) =>
       op
         .setName('moeda')
-        .setDescription('Moeda')
+        .setDescription('Currency')
         .addChoices(
           { name: 'Robux', value: 'robux' },
           { name: 'BRL', value: 'brl' },
         ),
     )
-    .addStringOption((op) => op.setName('link').setDescription('Link do produto'))
-    .addStringOption((op) => op.setName('descricao').setDescription('Descrição curta')),
+    .addStringOption((op) => op.setName('link').setDescription('Product link'))
+    .addStringOption((op) => op.setName('descricao').setDescription('Short description')),
   async execute(interaction) {
     const produtos = lerProdutos();
     const novo = {
@@ -47,7 +47,7 @@ module.exports = {
     salvarProdutos(produtos);
 
     await interaction.reply({
-      content: `Produto **${novo.nome}** adicionado (id \`${novo.id}\`).`,
+      content: `Product **${novo.nome}** added (id \`${novo.id}\`).`,
       flags: MessageFlags.Ephemeral,
     });
   },

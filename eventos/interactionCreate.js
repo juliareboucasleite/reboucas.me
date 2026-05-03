@@ -27,7 +27,7 @@ module.exports = {
       } catch (err) {
         console.error(`[botão ${id}]`, err);
         const resposta = {
-          content: 'algo deu errado ao processar essa ação.',
+          content: 'something went wrong handling that action.',
           flags: MessageFlags.Ephemeral,
         };
         if (interaction.deferred || interaction.replied) {
@@ -47,7 +47,7 @@ module.exports = {
 
     if (comando.categoria === 'admin' && !ehAdmin(interaction.user.id)) {
       return interaction.reply({
-        content: 'Esse comando é restrito aos administradores da Pawshop.',
+        content: 'This command is restricted to Pawshop admins.',
         flags: MessageFlags.Ephemeral,
       });
     }
@@ -57,7 +57,7 @@ module.exports = {
     } catch (erro) {
       console.error(`[comando ${interaction.commandName}]`, erro);
       const resposta = {
-        content: 'Algo deu errado ao executar esse comando.',
+        content: 'Something went wrong running this command.',
         flags: MessageFlags.Ephemeral,
       };
       if (interaction.deferred || interaction.replied) {

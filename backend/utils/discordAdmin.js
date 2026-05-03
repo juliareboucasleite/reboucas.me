@@ -157,11 +157,11 @@ async function sendPanelLogToDiscord(client, guildId, logEntry) {
 
   const embed = new EmbedBuilder()
     .setColor(config.appearance?.accentColor ?? '#f4cfe0')
-    .setTitle(logEntry.title ?? 'Painel administrativo')
+    .setTitle(logEntry.title ?? 'Admin panel')
     .setDescription(logEntry.message ?? '')
     .addFields(
-      { name: 'Origem', value: logEntry.source ?? 'painel', inline: true },
-      { name: 'Quando', value: `<t:${Math.floor(Date.now() / 1000)}:R>`, inline: true },
+      { name: 'Source', value: logEntry.source ?? 'panel', inline: true },
+      { name: 'When', value: `<t:${Math.floor(Date.now() / 1000)}:R>`, inline: true },
     );
 
   if (logEntry.actor?.username) {
