@@ -367,10 +367,9 @@ main { position: relative; z-index: 1; }
   background: var(--mauve);
 }
 .card h3 {
-  font-family: var(--serif);
-  font-size: 1.15rem;
-  font-weight: 500;
-  font-variation-settings: 'opsz' 36, 'SOFT' 70;
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--mauve-deep);
   letter-spacing: -0.01em;
 }
@@ -379,14 +378,12 @@ main { position: relative; z-index: 1; }
   color: var(--mauve);
 }
 .card .preco {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 1.35rem;
-  font-weight: 500;
+  font-family: var(--sans);
+  font-size: 1.05rem;
+  font-weight: 700;
   color: var(--mauve-deep);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.005em;
   margin-top: 0.2rem;
-  font-variation-settings: 'opsz' 36, 'SOFT' 100;
 }
 .card a, .card button {
   align-self: flex-start;
