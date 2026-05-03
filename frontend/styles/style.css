@@ -315,7 +315,7 @@ main { position: relative; z-index: 1; }
   max-width: 1200px;
   margin: 0 auto;
   padding: 5rem clamp(1.5rem, 5vw, 4rem) 4rem;
-  text-align: center;
+  text-align: left;
   position: relative;
 }
 .hero .eyebrow {
@@ -342,7 +342,7 @@ main { position: relative; z-index: 1; }
   font-variation-settings: 'opsz' 144, 'wght' 400, 'SOFT' 80;
   color: var(--mauve-deep);
   max-width: 16ch;
-  margin: 0 auto;
+  margin: 0;
 }
 .hero h1 em {
   font-style: italic;
@@ -350,7 +350,7 @@ main { position: relative; z-index: 1; }
   font-variation-settings: 'opsz' 144, 'wght' 400, 'SOFT' 100;
 }
 .hero p {
-  margin: 1.4rem auto 0;
+  margin: 1.4rem 0 0;
   max-width: 56ch;
   font-size: clamp(1rem, 1.4vw, 1.15rem);
   color: var(--mauve);
@@ -360,7 +360,7 @@ main { position: relative; z-index: 1; }
   display: flex;
   flex-wrap: wrap;
   gap: 0.7rem;
-  justify-content: center;
+  justify-content: flex-start;
   margin-top: 2.4rem;
 }
 
