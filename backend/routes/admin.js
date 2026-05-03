@@ -98,6 +98,14 @@ function sanitizeSettings(body) {
         toText(current.pricing?.description) ||
         'choose a payment method to open a ticket with the staff.',
       imageUrl: toText(current.pricing?.imageUrl),
+      imageAttachment:
+        current.pricing?.imageAttachment && typeof current.pricing.imageAttachment === 'object'
+          ? {
+              name: toText(current.pricing.imageAttachment.name),
+              type: toText(current.pricing.imageAttachment.type),
+              data: toText(current.pricing.imageAttachment.data),
+            }
+          : null,
       methods: PAYMENT_KEYS.reduce((acc, k) => {
         const m = current.pricing?.methods?.[k] ?? {};
         acc[k] = {
@@ -399,7 +407,8 @@ function criarAdminRouter(client) {
       if (!channel?.isTextBased()) return res.status(400).json({ erro: 'Canal inválido.' });
 
       const config = lerConfigGuild(guildId);
-      const sent = await channel.send(buildPrecosPanel(config));
+      const panel = buildPrecosPanel(config);
+      const sent = await channel.send(panel);
       await registrarLogPainel(req, client, guildId, {
         type: 'precos.posted',
         title: 'Price panel posted',

@@ -65,6 +65,7 @@ function criarConfigPadraoGuild() {
       title: 'price list · pawshop',
       description: 'choose a payment method to open a ticket with the staff.',
       imageUrl: '',
+      imageAttachment: null,
       methods: {
         robux: { enabled: true, label: 'Robux' },
         paypal: { enabled: true, label: 'PayPal' },

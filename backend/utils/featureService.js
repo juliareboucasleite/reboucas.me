@@ -91,6 +91,13 @@ function listMethodsEnabled(config) {
 function buildPrecosPanel(config) {
   const p = config.pricing ?? {};
   const enabled = listMethodsEnabled(config);
+  const attachment = p.imageAttachment?.data
+    ? {
+        name: p.imageAttachment.name || 'pawshop-prices.png',
+        type: p.imageAttachment.type || 'image/png',
+        data: p.imageAttachment.data,
+      }
+    : null;
 
   const embed = new EmbedBuilder()
     .setColor(config.appearance?.accentColor ?? '#f4cfe0')
@@ -104,7 +111,11 @@ function buildPrecosPanel(config) {
       })),
     );
 
-  if (p.imageUrl) embed.setImage(p.imageUrl);
+  if (attachment) {
+    embed.setImage(`attachment://${attachment.name}`);
+  } else if (p.imageUrl) {
+    embed.setImage(p.imageUrl);
+  }
 
   const buttons = enabled.map((k) =>
     new ButtonBuilder()
@@ -118,7 +129,11 @@ function buildPrecosPanel(config) {
     rows.push(new ActionRowBuilder().addComponents(buttons.slice(i, i + 5)));
   }
 
-  return { embeds: [embed], components: rows };
+  const files = attachment
+    ? [new AttachmentBuilder(Buffer.from(attachment.data, 'base64'), { name: attachment.name })]
+    : [];
+
+  return { embeds: [embed], components: rows, files };
 }
 
 async function handlePrecosButton(interaction, method) {
@@ -132,9 +147,9 @@ async function handlePrecosButton(interaction, method) {
   await interaction.deferReply({ ephemeral: true });
 
   try {
-    const safeName = `ticket-${interaction.user.username}`.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 90);
+    const safeName = `help-${interaction.user.username}`.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 90);
     const channel = await guild.channels.create({
-      name: safeName || `ticket-${interaction.user.id.slice(-5)}`,
+      name: safeName || `help-${interaction.user.id.slice(-5)}`,
       type: ChannelType.GuildText,
       parent: categoryId || undefined,
       permissionOverwrites: [
@@ -152,31 +167,31 @@ async function handlePrecosButton(interaction, method) {
     const closeRow = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId('paw:ticket-close')
-        .setLabel('close ticket')
+        .setLabel('close help ticket')
         .setStyle(ButtonStyle.Danger)
         .setEmoji('🔒'),
     );
 
     const embed = new EmbedBuilder()
       .setColor(config.appearance?.accentColor ?? '#f4cfe0')
-      .setTitle(`pricing ticket — ${methodLabel}`)
+      .setTitle(`help ticket — ${methodLabel}`)
       .setDescription(
-        `hi <@${interaction.user.id}>! ✿\nthis is your private room with the staff.\n\n` +
-          `chosen method: **${methodLabel}**\n\n` +
-          `tell us what you'd like to buy (item, roblox link, quantity) and wait for someone to reply.`,
+        `hi <@${interaction.user.id}>! ✿\nthis is your help ticket with the staff.\n\n` +
+          `topic: **${methodLabel}**\n\n` +
+          `send your question or what you need help with, and wait for someone to reply.`,
       );
 
     await channel.send({ content: `<@${interaction.user.id}>`, embeds: [embed], components: [closeRow] });
 
     await interaction.editReply({
-      content: `ticket opened: <#${channel.id}> — chat with us there ✦`,
+      content: `help ticket opened: <#${channel.id}> — chat with us there ✦`,
     });
 
     adicionarLogAtividade({
       guildId: guild.id,
       type: 'ticket.opened',
       source: 'bot',
-      title: 'Pricing ticket opened',
+      title: 'Help ticket opened',
       message: `${interaction.user.tag} chose ${methodLabel}.`,
       meta: { userId: interaction.user.id, channelId: channel.id, method },
     });

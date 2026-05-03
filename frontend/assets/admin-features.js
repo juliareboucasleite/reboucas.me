@@ -35,6 +35,15 @@
     });
   }
 
+  function readFileAsDataUrl(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ''));
+      reader.onerror = () => reject(new Error('não foi possível ler o arquivo selecionado'));
+      reader.readAsDataURL(file);
+    });
+  }
+
   function toast(msg, isError = false) {
     let node = document.getElementById('admin-toast');
     if (!node) {
@@ -176,6 +185,18 @@
           label: String(fd.get(`label_${k}`) ?? '').trim() || k,
         };
       });
+
+      const imageFile = fd.get('imageFile');
+      const imageAttachment = imageFile instanceof File && imageFile.size > 0
+        ? (() => readFileAsDataUrl(imageFile).then((dataUrl) => {
+            const [, base64Part] = dataUrl.split(',', 2);
+            return {
+              name: imageFile.name || 'pawshop-prices.png',
+              type: imageFile.type || 'application/octet-stream',
+              data: base64Part || '',
+            };
+          }))()
+        : null;
       try {
         const atual = await api('api/admin/settings');
         await api('api/admin/settings', {
@@ -187,6 +208,7 @@
               title: fd.get('title'),
               description: fd.get('description'),
               imageUrl: fd.get('imageUrl'),
+              imageAttachment: imageAttachment ? await imageAttachment : (atual.pricing?.imageAttachment ?? null),
               methods,
             },
           }),
