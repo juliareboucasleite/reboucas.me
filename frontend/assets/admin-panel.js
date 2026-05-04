@@ -210,12 +210,74 @@ function fillChannelSelects() {
   });
 }
 
+function renderImagePickerFor(select, assets) {
+  const id = select.dataset.pickerId || `img-picker-${Math.random().toString(36).slice(2, 8)}`;
+  select.dataset.pickerId = id;
+
+  let picker = document.querySelector(`[data-image-asset-picker="${id}"]`);
+  if (!picker) {
+    picker = document.createElement('div');
+    picker.className = 'image-picker';
+    picker.dataset.imageAssetPicker = id;
+    select.insertAdjacentElement('afterend', picker);
+  }
+
+  const current = select.value || '';
+  const items = [
+    { value: '', label: 'Sem imagem', isEmpty: true },
+    ...assets,
+  ];
+
+  picker.innerHTML = items
+    .map((asset) => {
+      const isSelected = (asset.value || '') === current;
+      const thumb = asset.isEmpty
+        ? '<span class="image-picker__none" aria-hidden="true">∅</span>'
+        : `<img src="images/${encodeURIComponent(asset.value)}" alt="${escapeHtml(asset.label)}" loading="lazy" />`;
+      return `
+        <button
+          type="button"
+          class="image-picker__item${isSelected ? ' is-selected' : ''}"
+          data-asset-value="${escapeHtml(asset.value)}"
+          title="${escapeHtml(asset.label)}"
+        >
+          ${thumb}
+          <span class="image-picker__label">${escapeHtml(asset.label)}</span>
+        </button>`;
+    })
+    .join('');
+
+  picker.querySelectorAll('[data-asset-value]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const value = btn.dataset.assetValue || '';
+      select.value = value;
+      select.dispatchEvent(new Event('change', { bubbles: true }));
+      picker.querySelectorAll('.image-picker__item').forEach((it) => it.classList.remove('is-selected'));
+      btn.classList.add('is-selected');
+    });
+  });
+
+  if (!select.dataset.pickerSync) {
+    select.dataset.pickerSync = '1';
+    select.addEventListener('change', () => {
+      const value = select.value || '';
+      picker.querySelectorAll('.image-picker__item').forEach((it) => {
+        it.classList.toggle('is-selected', (it.dataset.assetValue || '') === value);
+      });
+    });
+  }
+}
+
+function getMergedImageAssets() {
+  const assets = [...DEFAULT_IMAGE_ASSETS, ...(state.imageAssets || [])];
+  return assets.filter((asset, index, array) =>
+    index === array.findIndex((item) => item.value === asset.value),
+  );
+}
+
 async function fillImageAssetSelects() {
   try {
-    const assets = [...DEFAULT_IMAGE_ASSETS, ...(state.imageAssets || [])];
-    const uniqueAssets = assets.filter((asset, index, array) =>
-      index === array.findIndex((item) => item.value === asset.value),
-    );
+    const uniqueAssets = getMergedImageAssets();
     const options = ['<option value="">Sem imagem</option>']
       .concat(uniqueAssets.map((asset) => `<option value="${escapeHtml(asset.value)}">${escapeHtml(asset.label)}</option>`))
       .join('');
@@ -224,11 +286,17 @@ async function fillImageAssetSelects() {
       const previous = select.value;
       select.innerHTML = options;
       if (previous) select.value = previous;
+      renderImagePickerFor(select, uniqueAssets);
     });
   } catch (error) {
     console.warn('[admin] fillImageAssetSelects failed', error);
   }
 }
+
+window.__pawshopImagePicker = {
+  render: renderImagePickerFor,
+  getAssets: getMergedImageAssets,
+};
 
 function populateSettingsForm() {
   const settings = state.settings;
