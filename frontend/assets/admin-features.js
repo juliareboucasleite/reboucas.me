@@ -105,6 +105,22 @@
       });
 
       // cargos
+      $$('div[data-role-multiselect]').forEach((container) => {
+        const selected = new Set(
+          Array.from(container.querySelectorAll('input[type="checkbox"][data-role-id]:checked')).map((input) => input.value),
+        );
+
+        container.innerHTML = roles
+          .map(
+            (role) => `
+              <label class="checkbox-row checkbox-row--stacked">
+                <input type="checkbox" data-role-id value="${escapeHtml(role.id)}" ${selected.has(role.id) ? 'checked' : ''} />
+                <span>${escapeHtml(role.name)}</span>
+              </label>`,
+          )
+          .join('');
+      });
+
       $$('select[data-role-select]').forEach((sel) => {
         const cur = sel.hasAttribute('multiple') 
           ? Array.from(sel.options).filter(opt => opt.selected).map(opt => opt.value)

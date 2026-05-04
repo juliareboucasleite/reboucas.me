@@ -20,6 +20,7 @@ const refs = {
   settingsForm: document.getElementById('settings-form'),
   verifyForm: document.getElementById('verify-form'),
   verifyPostForm: document.getElementById('verify-post-form'),
+  roleMultiSelect: document.querySelector('[data-role-multiselect]'),
   supportHelpForm: document.getElementById('support-help-form'),
   supportInfoForm: document.getElementById('support-info-form'),
   embedForm: document.getElementById('embed-form'),
@@ -373,11 +374,12 @@ function populateSettingsForm() {
     verifyForm.title.value = settings.verification?.title || 'verify yourself';
     verifyForm.description.value = settings.verification?.description || '';
     verifyForm.buttonLabel.value = settings.verification?.buttonLabel || 'verify';
+
     const roleIds = settings.verification?.roleIds || [];
-    const roleSelect = verifyForm.querySelector('[name="roleIds"]');
-    if (roleSelect) {
-      Array.from(roleSelect.options).forEach((opt) => {
-        opt.selected = roleIds.includes(opt.value);
+    const roleContainer = refs.roleMultiSelect;
+    if (roleContainer) {
+      roleContainer.querySelectorAll('input[type="checkbox"][data-role-id]').forEach((checkbox) => {
+        checkbox.checked = roleIds.includes(checkbox.value);
       });
     }
   }
@@ -709,10 +711,9 @@ refs.verifyForm?.addEventListener('submit', async (event) => {
 
   try {
     const form = refs.verifyForm;
-    const roleSelect = form.querySelector('[name="roleIds"]');
-    const roleIds = Array.from(roleSelect.options)
-      .filter((opt) => opt.selected)
-      .map((opt) => opt.value);
+    const roleIds = Array.from(
+      refs.roleMultiSelect?.querySelectorAll('input[type="checkbox"][data-role-id]:checked') || [],
+    ).map((checkbox) => checkbox.value);
 
     if (roleIds.length === 0) {
       throw new Error('Selecione ao menos um cargo.');
