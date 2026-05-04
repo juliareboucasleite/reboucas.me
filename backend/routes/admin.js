@@ -103,6 +103,7 @@ function sanitizeSettings(body) {
       infoButtonLabel: toText(current.support?.infoButtonLabel) || 'Information',
       helpCategoryId: toText(current.support?.helpCategoryId),
       infoCategoryId: toText(current.support?.infoCategoryId),
+      channelId: toText(current.support?.channelId),
     },
     pricing: {
       ticketCategoryId: toText(current.pricing?.ticketCategoryId),
