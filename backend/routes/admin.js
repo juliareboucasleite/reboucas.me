@@ -456,14 +456,14 @@ function criarAdminRouter(client) {
       const guildId = getManagedGuildId(client);
       if (!guildId) return res.status(404).json({ erro: 'Guild não configurada.' });
 
-      const channelId = toText(req.body?.channelId);
+      const config = lerConfigGuild(guildId);
+      const channelId = toText(req.body?.channelId) || toText(config.support?.channelId);
       if (!channelId) return res.status(400).json({ erro: 'channelId obrigatório.' });
 
       const guild = await getManagedGuild(client, guildId);
       const channel = await guild.channels.fetch(channelId).catch(() => null);
       if (!channel?.isTextBased()) return res.status(400).json({ erro: 'Canal inválido.' });
 
-      const config = lerConfigGuild(guildId);
       const sent = await channel.send(buildSupportPanel(config));
       await registrarLogPainel(req, client, guildId, {
         type: 'support.posted',
