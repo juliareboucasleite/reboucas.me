@@ -185,7 +185,7 @@ module.exports = {
 
       if (tracking.messageCount >= 10 && !tracking.warnedAt10) {
         await message.channel.send(
-          `Se quiser dar continuidade, use /continuidade para receber o cargo <@&${ROLE_CONTINUIDADE_ID}>.`,
+          `Se quiser dar continuidade, use /continuidade para receber o cargo ${ROLE_CONTINUIDADE_ID}.`,
         ).catch(() => {});
         await atualizarTicketTracking(message.channel.id, { warnedAt10: true });
       }

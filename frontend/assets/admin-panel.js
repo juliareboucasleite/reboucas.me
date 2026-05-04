@@ -18,8 +18,8 @@ const refs = {
   refreshDashboard: document.getElementById('refresh-dashboard'),
   productForm: document.getElementById('form-novo'),
   settingsForm: document.getElementById('settings-form'),
-  supportForm: document.getElementById('support-form'),
-  supportPostForm: document.getElementById('support-post-form'),
+  supportHelpForm: document.getElementById('support-help-form'),
+  supportInfoForm: document.getElementById('support-info-form'),
   embedForm: document.getElementById('embed-form'),
   previewWelcome: document.getElementById('preview-welcome'),
   previewGoodbye: document.getElementById('preview-goodbye'),
@@ -348,16 +348,22 @@ function populateSettingsForm() {
   form.goodbyeOutro.value = settings.goodbye?.outro || '';
   form.goodbyeMemberCountText.value = settings.goodbye?.memberCountText || '';
 
-  const supportForm = refs.supportForm;
-  if (supportForm) {
-    supportForm.supportTitle.value = settings.support?.title || 'Do you have a question?';
-    supportForm.supportDescription.value = settings.support?.description || '';
-    supportForm.helpButtonLabel.value = settings.support?.helpButtonLabel || 'Help';
-    supportForm.infoButtonLabel.value = settings.support?.infoButtonLabel || 'Information';
-    supportForm.supportFooter.value = settings.support?.footer || 'Powered by tickets.bot';
-    supportForm.helpCategoryId.value = settings.support?.helpCategoryId || '';
-    supportForm.infoCategoryId.value = settings.support?.infoCategoryId || '';
-    supportForm.channelId.value = settings.support?.channelId || '';
+  const helpForm = refs.supportHelpForm;
+  if (helpForm) {
+    helpForm.title.value = settings.support?.help?.title || 'Help';
+    helpForm.description.value = settings.support?.help?.description || '';
+    helpForm.footer.value = settings.support?.help?.footer || 'Powered by tickets.bot';
+    helpForm.categoryId.value = settings.support?.help?.categoryId || '';
+    helpForm.channelId.value = settings.support?.help?.channelId || '';
+  }
+
+  const infoForm = refs.supportInfoForm;
+  if (infoForm) {
+    infoForm.title.value = settings.support?.info?.title || 'Information';
+    infoForm.description.value = settings.support?.info?.description || '';
+    infoForm.footer.value = settings.support?.info?.footer || 'Powered by tickets.bot';
+    infoForm.categoryId.value = settings.support?.info?.categoryId || '';
+    infoForm.channelId.value = settings.support?.info?.channelId || '';
   }
 
   refs.embedForm.channelId.value = settings.channels?.embedChannelId || '';
@@ -394,16 +400,28 @@ function getSettingsFromForm() {
       outro: form.goodbyeOutro.value,
       memberCountText: form.goodbyeMemberCountText.value,
     },
-    support: refs.supportForm
+    support: refs.supportHelpForm || refs.supportInfoForm
       ? {
-          title: refs.supportForm.supportTitle.value,
-          description: refs.supportForm.supportDescription.value,
-          helpButtonLabel: refs.supportForm.helpButtonLabel.value,
-          infoButtonLabel: refs.supportForm.infoButtonLabel.value,
-          footer: refs.supportForm.supportFooter.value,
-          helpCategoryId: refs.supportForm.helpCategoryId.value,
-          infoCategoryId: refs.supportForm.infoCategoryId.value,
-          channelId: refs.supportForm.channelId.value,
+          help: refs.supportHelpForm
+            ? {
+                title: refs.supportHelpForm.title.value,
+                description: refs.supportHelpForm.description.value,
+                footer: refs.supportHelpForm.footer.value,
+                buttonLabel: refs.supportHelpForm.title.value || 'Open help ticket',
+                categoryId: refs.supportHelpForm.categoryId.value,
+                channelId: refs.supportHelpForm.channelId.value,
+              }
+            : state.settings?.support?.help || {},
+          info: refs.supportInfoForm
+            ? {
+                title: refs.supportInfoForm.title.value,
+                description: refs.supportInfoForm.description.value,
+                footer: refs.supportInfoForm.footer.value,
+                buttonLabel: refs.supportInfoForm.title.value || 'Open information ticket',
+                categoryId: refs.supportInfoForm.categoryId.value,
+                channelId: refs.supportInfoForm.channelId.value,
+              }
+            : state.settings?.support?.info || {},
         }
       : state.settings?.support || {},
     appearance: {
@@ -563,7 +581,7 @@ refs.productForm.addEventListener('submit', async (event) => {
 refs.settingsForm.addEventListener('input', renderPreviewCards);
 refs.settingsForm.addEventListener('change', renderPreviewCards);
 
-refs.supportForm?.addEventListener('submit', async (event) => {
+refs.supportHelpForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
 
   try {
@@ -572,30 +590,30 @@ refs.supportForm?.addEventListener('submit', async (event) => {
       method: 'PUT',
       body: JSON.stringify(payload),
     });
-    const supportChannelId = refs.supportForm.channelId.value;
+    const supportChannelId = refs.supportHelpForm.channelId.value;
     if (supportChannelId) {
       await requestJson('api/admin/support/post', {
         method: 'POST',
-        body: JSON.stringify({ channelId: supportChannelId }),
+        body: JSON.stringify({ channelId: supportChannelId, kind: 'help' }),
       });
     }
-    notify('Suporte salvo.');
+    notify('Help salvo.');
     await loadDashboard();
   } catch (error) {
     notify(error.message, true);
   }
 });
 
-refs.supportPostForm?.addEventListener('submit', async (event) => {
+refs.supportInfoForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
 
   try {
     const formData = new FormData(event.currentTarget);
     await requestJson('api/admin/support/post', {
       method: 'POST',
-      body: JSON.stringify({ channelId: formData.get('channelId') }),
+      body: JSON.stringify({ channelId: formData.get('channelId'), kind: 'info' }),
     });
-    notify('Painel de suporte postado.');
+    notify('Information salvo.');
     await loadDashboard();
   } catch (error) {
     notify(error.message, true);

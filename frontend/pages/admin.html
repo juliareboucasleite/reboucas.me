@@ -400,56 +400,60 @@
 
           <div class="admin-grid">
             <section class="admin-card">
-              <h3>Configuração do painel</h3>
-              <form id="support-form" class="stack-form">
+              <h3>Ticket de ajuda</h3>
+              <form id="support-help-form" class="stack-form">
                 <label>
                   Título do painel
-                  <input name="supportTitle" placeholder="Do you have a question?" />
+                  <input name="title" placeholder="Help" />
                 </label>
                 <label>
                   Descrição
-                  <textarea name="supportDescription" placeholder="If you have any questions, you can open a ticket and ask!"></textarea>
+                  <textarea name="description" placeholder="If you need help, open a ticket and explain your issue."></textarea>
                 </label>
-                <div class="form-split">
-                  <label>
-                    Texto do botão Help
-                    <input name="helpButtonLabel" placeholder="Help" />
-                  </label>
-                  <label>
-                    Texto do botão Information
-                    <input name="infoButtonLabel" placeholder="Information" />
-                  </label>
-                </div>
                 <label>
                   Rodapé
-                  <input name="supportFooter" placeholder="Powered by tickets.bot" />
+                  <input name="footer" placeholder="Powered by tickets.bot" />
                 </label>
                 <div class="form-split">
                   <label>
-                    Categoria Help
-                    <select name="helpCategoryId" data-category-select></select>
-                  </label>
-                  <label>
-                    Categoria Information
-                    <select name="infoCategoryId" data-category-select></select>
+                    Categoria
+                    <select name="categoryId" data-category-select></select>
                   </label>
                 </div>
                 <label>
                   Canal do painel
                   <select name="channelId" data-channel-select></select>
                 </label>
-                <button type="submit" class="btn btn--primary">Salvar suporte</button>
+                <button type="submit" class="btn btn--primary">Salvar ajuda</button>
               </form>
             </section>
 
             <section class="admin-card">
-              <h3>Postar painel num canal</h3>
-              <form id="support-post-form" class="stack-form">
+              <h3>Ticket de informação</h3>
+              <form id="support-info-form" class="stack-form">
                 <label>
-                  Canal
+                  Título do painel
+                  <input name="title" placeholder="Information" />
+                </label>
+                <label>
+                  Descrição
+                  <textarea name="description" placeholder="Tell us what you need to know."></textarea>
+                </label>
+                <label>
+                  Rodapé
+                  <input name="footer" placeholder="Powered by tickets.bot" />
+                </label>
+                <div class="form-split">
+                  <label>
+                    Categoria
+                    <select name="categoryId" data-category-select></select>
+                  </label>
+                </div>
+                <label>
+                  Canal do painel
                   <select name="channelId" data-channel-select></select>
                 </label>
-                <button type="submit" class="btn btn--outline">Postar agora</button>
+                <button type="submit" class="btn btn--outline">Salvar informação</button>
               </form>
             </section>
           </div>

@@ -61,15 +61,22 @@ function criarConfigPadraoGuild() {
       buttonLabel: 'verify',
     },
     support: {
-      title: 'Do you have a question?',
-      description:
-        'If you have any questions, you can open a ticket and ask!\n\nPlease describe your issue and wait for a response.',
-      footer: 'Powered by tickets.bot',
-      helpButtonLabel: 'Help',
-      infoButtonLabel: 'Information',
-      helpCategoryId: '',
-      infoCategoryId: '',
-      channelId: '',
+      help: {
+        title: 'Help',
+        description: 'If you need help, open a ticket and explain your issue.',
+        footer: 'Powered by tickets.bot',
+        buttonLabel: 'Open help ticket',
+        categoryId: '',
+        channelId: '',
+      },
+      info: {
+        title: 'Information',
+        description: 'If you need information, open a ticket and tell us what you want to know.',
+        footer: 'Powered by tickets.bot',
+        buttonLabel: 'Open information ticket',
+        categoryId: '',
+        channelId: '',
+      },
     },
     pricing: {
       ticketCategoryId: '',

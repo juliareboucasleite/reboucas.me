@@ -94,16 +94,26 @@ function sanitizeSettings(body) {
       buttonLabel: toText(current.verification?.buttonLabel) || 'verify',
     },
     support: {
-      title: toText(current.support?.title) || 'Do you have a question?',
-      description:
-        toText(current.support?.description) ||
-        'If you have any questions, you can open a ticket and ask!\n\nPlease describe your issue and wait for a response.',
-      footer: toText(current.support?.footer) || 'Powered by tickets.bot',
-      helpButtonLabel: toText(current.support?.helpButtonLabel) || 'Help',
-      infoButtonLabel: toText(current.support?.infoButtonLabel) || 'Information',
-      helpCategoryId: toText(current.support?.helpCategoryId),
-      infoCategoryId: toText(current.support?.infoCategoryId),
-      channelId: toText(current.support?.channelId),
+      help: {
+        title: toText(current.support?.help?.title) || 'Help',
+        description:
+          toText(current.support?.help?.description) ||
+          'If you need help, open a ticket and explain your issue.',
+        footer: toText(current.support?.help?.footer) || 'Powered by tickets.bot',
+        buttonLabel: toText(current.support?.help?.buttonLabel) || 'Open help ticket',
+        categoryId: toText(current.support?.help?.categoryId),
+        channelId: toText(current.support?.help?.channelId),
+      },
+      info: {
+        title: toText(current.support?.info?.title) || 'Information',
+        description:
+          toText(current.support?.info?.description) ||
+          'If you need information, open a ticket and tell us what you want to know.',
+        footer: toText(current.support?.info?.footer) || 'Powered by tickets.bot',
+        buttonLabel: toText(current.support?.info?.buttonLabel) || 'Open information ticket',
+        categoryId: toText(current.support?.info?.categoryId),
+        channelId: toText(current.support?.info?.channelId),
+      },
     },
     pricing: {
       ticketCategoryId: toText(current.pricing?.ticketCategoryId),
@@ -457,18 +467,19 @@ function criarAdminRouter(client) {
       if (!guildId) return res.status(404).json({ erro: 'Guild não configurada.' });
 
       const config = lerConfigGuild(guildId);
-      const channelId = toText(req.body?.channelId) || toText(config.support?.channelId);
+      const kind = toText(req.body?.kind) || 'help';
+      const channelId = toText(req.body?.channelId) || toText(config.support?.[kind]?.channelId);
       if (!channelId) return res.status(400).json({ erro: 'channelId obrigatório.' });
 
       const guild = await getManagedGuild(client, guildId);
       const channel = await guild.channels.fetch(channelId).catch(() => null);
       if (!channel?.isTextBased()) return res.status(400).json({ erro: 'Canal inválido.' });
 
-      const sent = await channel.send(buildSupportPanel(config));
+      const sent = await channel.send(buildSupportPanel(config, kind));
       await registrarLogPainel(req, client, guildId, {
         type: 'support.posted',
         title: 'Support panel posted',
-        message: `Posted in <#${channelId}>.`,
+        message: `Posted ${kind} panel in <#${channelId}>.`,
       });
 
       res.json({ ok: true, channelId, messageId: sent.id });

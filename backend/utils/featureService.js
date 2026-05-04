@@ -32,43 +32,36 @@ function buildTicketActionRows(claimedBy = '') {
         .setCustomId('paw:ticket:close')
         .setLabel('Close')
         .setStyle(ButtonStyle.Danger)
-        .setEmoji('🔒'),
+        ,
       new ButtonBuilder()
         .setCustomId('paw:ticket:close-reason')
         .setLabel('Close With Reason')
         .setStyle(ButtonStyle.Secondary)
-        .setEmoji('📝'),
+        ,
       new ButtonBuilder()
         .setCustomId(claimed ? 'paw:ticket:unclaim' : 'paw:ticket:claim')
         .setLabel(claimed ? 'Unclaim' : 'Claim')
         .setStyle(claimed ? ButtonStyle.Secondary : ButtonStyle.Success)
-        .setEmoji('👋'),
+        ,
     ),
   ];
 }
 
-function buildSupportPanel(config = {}) {
-  const support = config.support ?? {};
+function buildSupportPanel(config = {}, kind = 'help') {
+  const support = config.support?.[kind] ?? {};
+  const panelKind = kind === 'info' ? 'information' : 'help';
   const embed = new EmbedBuilder()
     .setColor(config.appearance?.accentColor ?? '#f4cfe0')
-    .setTitle(support.title || 'Do you have a question?')
-    .setDescription(
-      support.description ||
-        'If you have any questions, you can open a ticket and ask!\n\nPlease describe your issue and wait for a response.',
-    )
+    .setTitle(support.title || (kind === 'info' ? 'Information' : 'Help'))
+    .setDescription(support.description || (kind === 'info' ? 'Tell us what you need to know.' : 'Explain your issue and wait for a response.'))
     .setFooter({ text: support.footer || 'Powered by tickets.bot' });
 
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
-      .setCustomId('paw:support:help')
-      .setLabel(support.helpButtonLabel || 'Help')
+      .setCustomId(kind === 'info' ? 'paw:support:info' : 'paw:support:help')
+      .setLabel(support.buttonLabel || (kind === 'info' ? 'Open information ticket' : 'Open help ticket'))
       .setStyle(ButtonStyle.Primary)
-      .setEmoji('🩷'),
-    new ButtonBuilder()
-      .setCustomId('paw:support:info')
-      .setLabel(support.infoButtonLabel || 'Information')
-      .setStyle(ButtonStyle.Secondary)
-      .setEmoji('ℹ️'),
+      ,
   );
 
   return { embeds: [embed], components: [row] };
