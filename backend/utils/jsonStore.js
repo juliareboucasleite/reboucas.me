@@ -60,6 +60,13 @@ function criarConfigPadraoGuild() {
       description: 'click the button below to unlock the rest of the server (｡•ᴗ•｡)',
       buttonLabel: 'verify',
     },
+    support: {
+      title: 'Do you have a question?',
+      description:
+        'If you have any questions, you can open a ticket and ask!\n\nPlease describe your issue and wait for a response.',
+      buttonLabel: 'Open a ticket!',
+      footer: 'Powered by tickets.bot',
+    },
     pricing: {
       ticketCategoryId: '',
       title: 'price list · pawshop',

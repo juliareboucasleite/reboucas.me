@@ -51,12 +51,12 @@ function buildSupportPanel(config = {}) {
   const support = config.support ?? {};
   const embed = new EmbedBuilder()
     .setColor(config.appearance?.accentColor ?? '#f4cfe0')
-    .setTitle(support.title || 'Support /pawshop')
+    .setTitle(support.title || 'Do you have a question?')
     .setDescription(
       support.description ||
-        'If you have any questions, open a ticket and describe your issue. Our team will answer as soon as possible.',
+        'If you have any questions, you can open a ticket and ask!\n\nPlease describe your issue and wait for a response.',
     )
-    .setFooter({ text: support.footer || 'Powered by Pawshop' });
+    .setFooter({ text: support.footer || 'Powered by tickets.bot' });
 
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
@@ -243,9 +243,7 @@ async function handleSupportOpenButton(interaction) {
   return createTicketChannel(interaction, {
     title: 'Support /pawshop',
     description:
-      `hi <@${interaction.user.id}>! ✿\n` +
-      'thank you for contacting support.\n' +
-      'please describe your issue and wait for a response.',
+      'Thank you for contacting support.\nPlease describe your issue and wait for a response.',
     topicLabel: 'support',
     logType: 'support.ticket.opened',
     logTitle: 'Support ticket opened',
