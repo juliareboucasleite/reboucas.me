@@ -31,25 +31,21 @@ function buildTicketActionRows(claimedBy = '') {
       new ButtonBuilder()
         .setCustomId('paw:ticket:close')
         .setLabel('Close')
-        .setStyle(ButtonStyle.Danger)
-        ,
+        .setStyle(ButtonStyle.Danger),
       new ButtonBuilder()
         .setCustomId('paw:ticket:close-reason')
         .setLabel('Close With Reason')
-        .setStyle(ButtonStyle.Secondary)
-        ,
+        .setStyle(ButtonStyle.Secondary),
       new ButtonBuilder()
         .setCustomId(claimed ? 'paw:ticket:unclaim' : 'paw:ticket:claim')
         .setLabel(claimed ? 'Unclaim' : 'Claim')
-        .setStyle(claimed ? ButtonStyle.Secondary : ButtonStyle.Success)
-        ,
+        .setStyle(claimed ? ButtonStyle.Secondary : ButtonStyle.Success),
     ),
   ];
 }
 
 function buildSupportPanel(config = {}, kind = 'help') {
   const support = config.support?.[kind] ?? {};
-  const panelKind = kind === 'info' ? 'information' : 'help';
   const embed = new EmbedBuilder()
     .setColor(config.appearance?.accentColor ?? '#f4cfe0')
     .setTitle(support.title || (kind === 'info' ? 'Information' : 'Help'))
@@ -60,8 +56,7 @@ function buildSupportPanel(config = {}, kind = 'help') {
     new ButtonBuilder()
       .setCustomId(kind === 'info' ? 'paw:support:info' : 'paw:support:help')
       .setLabel(support.buttonLabel || (kind === 'info' ? 'Open information ticket' : 'Open help ticket'))
-      .setStyle(ButtonStyle.Primary)
-      ,
+      .setStyle(ButtonStyle.Primary),
   );
 
   return { embeds: [embed], components: [row] };
