@@ -357,6 +357,7 @@ function populateSettingsForm() {
     supportForm.supportFooter.value = settings.support?.footer || 'Powered by tickets.bot';
     supportForm.helpCategoryId.value = settings.support?.helpCategoryId || '';
     supportForm.infoCategoryId.value = settings.support?.infoCategoryId || '';
+    supportForm.channelId.value = settings.support?.channelId || '';
   }
 
   refs.embedForm.channelId.value = settings.channels?.embedChannelId || '';
@@ -402,6 +403,7 @@ function getSettingsFromForm() {
           footer: refs.supportForm.supportFooter.value,
           helpCategoryId: refs.supportForm.helpCategoryId.value,
           infoCategoryId: refs.supportForm.infoCategoryId.value,
+          channelId: refs.supportForm.channelId.value,
         }
       : state.settings?.support || {},
     appearance: {
@@ -570,6 +572,13 @@ refs.supportForm?.addEventListener('submit', async (event) => {
       method: 'PUT',
       body: JSON.stringify(payload),
     });
+    const supportChannelId = refs.supportForm.channelId.value;
+    if (supportChannelId) {
+      await requestJson('api/admin/support/post', {
+        method: 'POST',
+        body: JSON.stringify({ channelId: supportChannelId }),
+      });
+    }
     notify('Suporte salvo.');
     await loadDashboard();
   } catch (error) {
