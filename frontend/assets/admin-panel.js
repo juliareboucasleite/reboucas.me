@@ -608,11 +608,18 @@ refs.supportInfoForm?.addEventListener('submit', async (event) => {
   event.preventDefault();
 
   try {
-    const formData = new FormData(event.currentTarget);
-    await requestJson('api/admin/support/post', {
-      method: 'POST',
-      body: JSON.stringify({ channelId: formData.get('channelId'), kind: 'info' }),
+    const payload = getSettingsFromForm();
+    state.settings = await requestJson('api/admin/settings', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
     });
+    const supportChannelId = refs.supportInfoForm.channelId.value;
+    if (supportChannelId) {
+      await requestJson('api/admin/support/post', {
+        method: 'POST',
+        body: JSON.stringify({ channelId: supportChannelId, kind: 'info' }),
+      });
+    }
     notify('Information salvo.');
     await loadDashboard();
   } catch (error) {
