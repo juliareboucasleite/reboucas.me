@@ -51,6 +51,9 @@
         const current = sel.value;
         sel.innerHTML = options;
         if (current) sel.value = current;
+        if (window.__pawshopImagePicker?.render) {
+          window.__pawshopImagePicker.render(sel, assets);
+        }
       });
     } catch (err) {
       console.warn('[features] popular images falhou', err);
