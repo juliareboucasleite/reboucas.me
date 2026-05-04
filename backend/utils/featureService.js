@@ -60,10 +60,15 @@ function buildSupportPanel(config = {}) {
 
   const row = new ActionRowBuilder().addComponents(
     new ButtonBuilder()
-      .setCustomId('paw:support:open')
-      .setLabel(support.buttonLabel || 'Open a ticket!')
+      .setCustomId('paw:support:help')
+      .setLabel(support.helpButtonLabel || 'Help')
       .setStyle(ButtonStyle.Primary)
-      .setEmoji('✉️'),
+      .setEmoji('🩷'),
+    new ButtonBuilder()
+      .setCustomId('paw:support:info')
+      .setLabel(support.infoButtonLabel || 'Information')
+      .setStyle(ButtonStyle.Secondary)
+      .setEmoji('ℹ️'),
   );
 
   return { embeds: [embed], components: [row] };
@@ -183,11 +188,12 @@ function buildPrecosPanel(config) {
 }
 
 async function createTicketChannel(interaction, { title, description, logType, logTitle, logMessage, topicLabel }) {
+async function createTicketChannel(interaction, { title, description, logType, logTitle, logMessage, topicLabel, categoryId }) {
   const config = lerConfigGuild(interaction.guildId);
   const guild = interaction.guild;
   if (!guild) return null;
 
-  const categoryId = config.pricing?.ticketCategoryId;
+  const targetCategoryId = categoryId || config.pricing?.ticketCategoryId;
 
   await interaction.deferReply({ ephemeral: true });
 
@@ -196,7 +202,7 @@ async function createTicketChannel(interaction, { title, description, logType, l
     const channel = await guild.channels.create({
       name: safeName || `help-${interaction.user.id.slice(-5)}`,
       type: ChannelType.GuildText,
-      parent: categoryId || undefined,
+      parent: targetCategoryId || undefined,
       permissionOverwrites: [
         {
           id: guild.roles.everyone.id,
@@ -241,13 +247,27 @@ async function createTicketChannel(interaction, { title, description, logType, l
 
 async function handleSupportOpenButton(interaction) {
   return createTicketChannel(interaction, {
-    title: 'Support /pawshop',
+    title: 'Help /pawshop',
     description:
       'Thank you for contacting support.\nPlease describe your issue and wait for a response.',
-    topicLabel: 'support',
-    logType: 'support.ticket.opened',
-    logTitle: 'Support ticket opened',
-    logMessage: `${interaction.user.tag} opened a support ticket.`,
+    topicLabel: 'help',
+    logType: 'support.help.opened',
+    logTitle: 'Help ticket opened',
+    logMessage: `${interaction.user.tag} opened a help ticket.`,
+    categoryId: lerConfigGuild(interaction.guildId).support?.helpCategoryId,
+  });
+}
+
+async function handleSupportInfoButton(interaction) {
+  return createTicketChannel(interaction, {
+    title: 'Information /pawshop',
+    description:
+      'Thanks for reaching out.\nPlease share what information you need and wait for a response.',
+    topicLabel: 'information',
+    logType: 'support.info.opened',
+    logTitle: 'Information ticket opened',
+    logMessage: `${interaction.user.tag} opened an information ticket.`,
+    categoryId: lerConfigGuild(interaction.guildId).support?.infoCategoryId,
   });
 }
 
@@ -543,6 +563,7 @@ module.exports = {
   buildSupportPanel,
   buildPrecosPanel,
   handleSupportOpenButton,
+  handleSupportInfoButton,
   handlePrecosButton,
   handleTicketClose,
   handleTicketClaim,

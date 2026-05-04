@@ -64,8 +64,11 @@ function criarConfigPadraoGuild() {
       title: 'Do you have a question?',
       description:
         'If you have any questions, you can open a ticket and ask!\n\nPlease describe your issue and wait for a response.',
-      buttonLabel: 'Open a ticket!',
       footer: 'Powered by tickets.bot',
+      helpButtonLabel: 'Help',
+      infoButtonLabel: 'Information',
+      helpCategoryId: '',
+      infoCategoryId: '',
     },
     pricing: {
       ticketCategoryId: '',
