@@ -2,6 +2,21 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { lerProdutos } = require('../../backend/utils/jsonStore');
 const config = require('../../config/config.json');
 
+function formatCurrency(code) {
+  switch (String(code || '').toLowerCase()) {
+    case 'brl':
+      return 'R$';
+    case 'eur':
+      return '€';
+    case 'usd':
+      return '$';
+    case 'robux':
+      return 'Robux';
+    default:
+      return String(code || '').toUpperCase();
+  }
+}
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('catalogo')
@@ -33,7 +48,7 @@ module.exports = {
 
     for (const p of lista.slice(0, 25)) {
       embed.addFields({
-        name: `${p.nome} — ${p.preco} ${p.moeda}`,
+        name: `${p.nome} — ${p.preco} ${formatCurrency(p.moeda)}`,
         value: `${p.descricao}\n${p.link ? `[View on Roblox](${p.link})` : ''}`,
       });
     }

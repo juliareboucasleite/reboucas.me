@@ -27,6 +27,8 @@ module.exports = {
         .addChoices(
           { name: 'Robux', value: 'robux' },
           { name: 'BRL', value: 'brl' },
+          { name: 'Euro', value: 'eur' },
+          { name: 'Dollar', value: 'usd' },
         ),
     )
     .addStringOption((op) => op.setName('link').setDescription('Product link'))

@@ -149,7 +149,7 @@ function validarPrefixo(commandName, args) {
   const faltando = obrigatorios.filter((chave) => !valores[chave]);
 
   if (faltando.length > 0) {
-    return 'Uso: `-addproduto nome="Produto" categoria=roupas preco=100 [moeda=robux] [link=https://...] [descricao="..."]`';
+    return 'Uso: `-addproduto nome="Produto" categoria=roupas preco=100 [moeda=robux|brl|eur|usd] [link=https://...] [descricao="..."]`';
   }
 
   if (Number.isNaN(Number.parseInt(valores.preco, 10))) {

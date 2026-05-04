@@ -6,6 +6,9 @@ const {
   ChannelType,
   EmbedBuilder,
   PermissionFlagsBits,
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
 } = require('discord.js');
 const path = require('node:path');
 const {
@@ -20,6 +23,51 @@ const { createImageFiles, getManagedGuild, getManagedGuildId, resolveImageAssetF
 
 const IMAGE_DIR = path.join(__dirname, '..', '..', 'frontend', 'images');
 const PAYMENT_KEYS = ['robux', 'paypal', 'wise', 'stripe'];
+
+function buildTicketActionRows(claimedBy = '') {
+  const claimed = Boolean(claimedBy);
+  return [
+    new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('paw:ticket:close')
+        .setLabel('Close')
+        .setStyle(ButtonStyle.Danger)
+        .setEmoji('🔒'),
+      new ButtonBuilder()
+        .setCustomId('paw:ticket:close-reason')
+        .setLabel('Close With Reason')
+        .setStyle(ButtonStyle.Secondary)
+        .setEmoji('📝'),
+      new ButtonBuilder()
+        .setCustomId(claimed ? 'paw:ticket:unclaim' : 'paw:ticket:claim')
+        .setLabel(claimed ? 'Unclaim' : 'Claim')
+        .setStyle(claimed ? ButtonStyle.Secondary : ButtonStyle.Success)
+        .setEmoji('👋'),
+    ),
+  ];
+}
+
+function buildSupportPanel(config = {}) {
+  const support = config.support ?? {};
+  const embed = new EmbedBuilder()
+    .setColor(config.appearance?.accentColor ?? '#f4cfe0')
+    .setTitle(support.title || 'Support /pawshop')
+    .setDescription(
+      support.description ||
+        'If you have any questions, open a ticket and describe your issue. Our team will answer as soon as possible.',
+    )
+    .setFooter({ text: support.footer || 'Powered by Pawshop' });
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId('paw:support:open')
+      .setLabel(support.buttonLabel || 'Open a ticket!')
+      .setStyle(ButtonStyle.Primary)
+      .setEmoji('✉️'),
+  );
+
+  return { embeds: [embed], components: [row] };
+}
 
 // ============================================================
 // VERIFICAÇÃO
@@ -134,12 +182,11 @@ function buildPrecosPanel(config) {
   return { embeds: [embed], components: rows, files };
 }
 
-async function handlePrecosButton(interaction, method) {
+async function createTicketChannel(interaction, { title, description, logType, logTitle, logMessage, topicLabel }) {
   const config = lerConfigGuild(interaction.guildId);
   const guild = interaction.guild;
-  if (!guild) return;
+  if (!guild) return null;
 
-  const methodLabel = config.pricing?.methods?.[method]?.label ?? method;
   const categoryId = config.pricing?.ticketCategoryId;
 
   await interaction.deferReply({ ephemeral: true });
@@ -162,24 +209,12 @@ async function handlePrecosButton(interaction, method) {
       ],
     });
 
-    const closeRow = new ActionRowBuilder().addComponents(
-      new ButtonBuilder()
-        .setCustomId('paw:ticket-close')
-        .setLabel('close help ticket')
-        .setStyle(ButtonStyle.Danger)
-        .setEmoji('🔒'),
-    );
-
     const embed = new EmbedBuilder()
       .setColor(config.appearance?.accentColor ?? '#f4cfe0')
-      .setTitle(`help ticket — ${methodLabel}`)
-      .setDescription(
-        `hi <@${interaction.user.id}>! ✿\nthis is your help ticket with the staff.\n\n` +
-          `topic: **${methodLabel}**\n\n` +
-          `send your question or what you need help with, and wait for someone to reply.`,
-      );
+      .setTitle(title)
+      .setDescription(description);
 
-    await channel.send({ content: `<@${interaction.user.id}>`, embeds: [embed], components: [closeRow] });
+    await channel.send({ content: `<@${interaction.user.id}>`, embeds: [embed], components: buildTicketActionRows() });
 
     await interaction.editReply({
       content: `help ticket opened: <#${channel.id}> — chat with us there ✦`,
@@ -187,25 +222,106 @@ async function handlePrecosButton(interaction, method) {
 
     adicionarLogAtividade({
       guildId: guild.id,
-      type: 'ticket.opened',
+      type: logType,
       source: 'bot',
-      title: 'Help ticket opened',
-      message: `${interaction.user.tag} chose ${methodLabel}.`,
-      meta: { userId: interaction.user.id, channelId: channel.id, method },
+      title: logTitle,
+      message: logMessage,
+      meta: { userId: interaction.user.id, channelId: channel.id, topicLabel },
     });
+
+    return channel;
   } catch (err) {
-    console.error('[precos]', err);
+    console.error('[ticket]', err);
     await interaction.editReply({
       content: "couldn't create the ticket. ask an admin to check the bot permissions / category.",
     });
+    return null;
   }
+}
+
+async function handleSupportOpenButton(interaction) {
+  return createTicketChannel(interaction, {
+    title: 'Support /pawshop',
+    description:
+      `hi <@${interaction.user.id}>! ✿\n` +
+      'thank you for contacting support.\n' +
+      'please describe your issue and wait for a response.',
+    topicLabel: 'support',
+    logType: 'support.ticket.opened',
+    logTitle: 'Support ticket opened',
+    logMessage: `${interaction.user.tag} opened a support ticket.`,
+  });
+}
+
+async function handlePrecosButton(interaction, method) {
+  const config = lerConfigGuild(interaction.guildId);
+  const methodLabel = config.pricing?.methods?.[method]?.label ?? method;
+
+  return createTicketChannel(interaction, {
+    title: `help ticket — ${methodLabel}`,
+    description:
+      `hi <@${interaction.user.id}>! ✿\nthis is your help ticket with the staff.\n\n` +
+      `topic: **${methodLabel}**\n\n` +
+      'send your question or what you need help with, and wait for someone to reply.',
+    topicLabel: methodLabel,
+    logType: 'ticket.opened',
+    logTitle: 'Help ticket opened',
+    logMessage: `${interaction.user.tag} chose ${methodLabel}.`,
+  });
 }
 
 async function handleTicketClose(interaction) {
   const channel = interaction.channel;
   if (!channel) return;
-  await interaction.reply({ content: 'closing the ticket in 5s ⏳' });
+  if (!interaction.replied && !interaction.deferred) {
+    await interaction.reply({ content: 'closing the ticket in 5s ⏳', ephemeral: true }).catch(() => {});
+  }
   setTimeout(() => channel.delete().catch(() => {}), 5000);
+}
+
+async function handleTicketClaim(interaction, claimed = true) {
+  if (!interaction.message) return;
+
+  await interaction.message.edit({
+    components: buildTicketActionRows(claimed ? interaction.user.username : ''),
+  });
+
+  if (interaction.channel?.setTopic) {
+    await interaction.channel.setTopic(claimed ? `Claimed by ${interaction.user.tag}` : '').catch(() => {});
+  }
+
+  await interaction.reply({
+    content: claimed ? `Ticket claimed by ${interaction.user.tag}.` : 'Ticket unclaimed.',
+    ephemeral: true,
+  });
+}
+
+async function handleTicketCloseWithReason(interaction) {
+  const modal = new ModalBuilder().setCustomId('paw:ticket:close-reason-modal').setTitle('Close Ticket');
+
+  const reasonInput = new TextInputBuilder()
+    .setCustomId('reason')
+    .setLabel('Reason')
+    .setStyle(TextInputStyle.Paragraph)
+    .setPlaceholder('Reason for closing the ticket, e.g. "Resolved"')
+    .setRequired(true);
+
+  modal.addComponents(new ActionRowBuilder().addComponents(reasonInput));
+  await interaction.showModal(modal);
+}
+
+async function handleTicketCloseReasonModal(interaction) {
+  const reason = interaction.fields.getTextInputValue('reason')?.trim() || 'No reason specified';
+
+  await interaction.reply({ content: 'Ticket will be closed in 5 seconds.', ephemeral: true }).catch(() => {});
+
+  if (interaction.channel?.send) {
+    await interaction.channel.send({
+      content: `Ticket closed by <@${interaction.user.id}>. Reason: **${reason}**`,
+    }).catch(() => {});
+  }
+
+  setTimeout(() => interaction.channel?.delete().catch(() => {}), 5000);
 }
 
 // ============================================================
@@ -426,9 +542,14 @@ module.exports = {
   PAYMENT_KEYS,
   buildVerifyPanel,
   handleVerifyButton,
+  buildSupportPanel,
   buildPrecosPanel,
+  handleSupportOpenButton,
   handlePrecosButton,
   handleTicketClose,
+  handleTicketClaim,
+  handleTicketCloseWithReason,
+  handleTicketCloseReasonModal,
   buildGiveawayPanel,
   handleGiveawayButton,
   encerrarSorteio,
