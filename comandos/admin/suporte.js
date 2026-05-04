@@ -5,7 +5,7 @@ const { lerConfigGuild } = require('../../backend/utils/jsonStore');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('suporte')
-    .setDescription('[Admin] Post a support panel with a ticket button in the current channel.'),
+    .setDescription('[Admin] Post a support panel with help and information tickets in the current channel.'),
   async execute(interaction) {
     const config = lerConfigGuild(interaction.guildId);
     await interaction.channel.send(buildSupportPanel(config));
