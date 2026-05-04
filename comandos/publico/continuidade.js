@@ -12,14 +12,14 @@ function lerTipoTicket(channel) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('continuidade')
-    .setDescription('Recebe o cargo de continuidade dentro de um ticket de preços.'),
+    .setDescription('Confirma que você é cliente da Pawshop em um ticket.'),
   async execute(interaction) {
     const channel = interaction.channel;
     const ticketKind = lerTipoTicket(channel);
 
-    if (ticketKind !== 'prices') {
+    if (ticketKind !== 'prices' && ticketKind !== 'help') {
       return interaction.reply({
-        content: 'Use este comando apenas dentro de um ticket de preços.',
+        content: 'Use este comando apenas dentro de um ticket de preços ou de ajuda.',
         flags: MessageFlags.Ephemeral,
       });
     }
@@ -41,7 +41,7 @@ module.exports = {
     }
 
     try {
-      await interaction.member.roles.add(ROLE_CONTINUIDADE_ID, 'Continuidade solicitada via ticket de preços');
+      await interaction.member.roles.add(ROLE_CONTINUIDADE_ID, `Continuidade solicitada via ticket de ${ticketKind}`);
       await atualizarTicketTracking(channel.id, { continuityGranted: true });
       await interaction.reply({
         content: 'Cargo de continuidade concedido. Pode continuar por aqui ✦',

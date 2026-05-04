@@ -177,16 +177,17 @@ module.exports = {
     if (!message.guild || message.author.bot) return;
 
     const ticketKind = lerTipoTicket(message.channel);
-    if (ticketKind === 'prices') {
+    if (ticketKind === 'prices' || ticketKind === 'help') {
       const tracking = incrementarTicketTracking(message.channel.id, {
         kind: ticketKind,
         createdBy: message.channel.topic?.split(':')[2] || '',
       });
 
       if (tracking.messageCount >= 10 && !tracking.warnedAt10) {
-        await message.channel.send(
-          `Se quiser dar continuidade, use /continuidade para receber o cargo ${ROLE_CONTINUIDADE_ID}.`,
-        ).catch(() => {});
+        const aviso = ticketKind === 'prices'
+          ? `Se quiser dar continuidade, use /continuidade para receber o cargo ${ROLE_CONTINUIDADE_ID}.`
+          : 'Você é cliente da Pawshop? Se sim, use /continuidade para confirmar.';
+        await message.channel.send(aviso).catch(() => {});
         await atualizarTicketTracking(message.channel.id, { warnedAt10: true });
       }
     }
