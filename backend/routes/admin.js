@@ -161,25 +161,62 @@ function criarAdminRouter(client) {
   router.use(exigirAdmin);
 
   router.get('/dashboard', async (req, res) => {
-    const guild = await getManagedGuild(client);
     const guildId = getManagedGuildId(client);
-    const channels = await listGuildChannels(client, guildId);
-    const images = listImageAssets();
-    const settings = guildId ? lerConfigGuild(guildId) : null;
-    const logs = lerLogsAtividade(40).filter((entry) => !guildId || entry.guildId === guildId);
+    let guild = null;
+    let channels = [];
+
+    try {
+      guild = await getManagedGuild(client);
+    } catch (err) {
+      console.warn('[admin] getManagedGuild falhou:', err.message);
+    }
+
+    try {
+      channels = await listGuildChannels(client, guildId);
+    } catch (err) {
+      console.warn('[admin] listGuildChannels falhou:', err.message);
+    }
+
+    let images = [];
+    try {
+      images = listImageAssets();
+    } catch (err) {
+      console.warn('[admin] listImageAssets falhou:', err.message);
+    }
+
+    let settings = null;
+    try {
+      settings = guildId ? lerConfigGuild(guildId) : null;
+    } catch (err) {
+      console.warn('[admin] lerConfigGuild falhou:', err.message);
+    }
+
+    let logs = [];
+    try {
+      logs = lerLogsAtividade(40).filter((entry) => !guildId || entry.guildId === guildId);
+    } catch (err) {
+      console.warn('[admin] lerLogsAtividade falhou:', err.message);
+    }
+
+    let products = 0;
+    try {
+      products = lerProdutos().length;
+    } catch (err) {
+      console.warn('[admin] lerProdutos falhou:', err.message);
+    }
 
     res.json({
       guild: guild
         ? {
             id: guild.id,
             name: guild.name,
-            iconUrl: guild.iconURL(),
+            iconUrl: guild.iconURL?.() ?? null,
             memberCount: guild.memberCount ?? 0,
-            roleCount: guild.roles.cache.size,
+            roleCount: guild.roles?.cache?.size ?? 0,
           }
         : null,
       stats: {
-        products: lerProdutos().length,
+        products,
         channels: channels.length,
         logs: logs.length,
       },
