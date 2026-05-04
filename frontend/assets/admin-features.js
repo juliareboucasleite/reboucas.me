@@ -188,7 +188,10 @@
       form.elements.ticketCategoryId.value = p.ticketCategoryId ?? '';
       form.elements.title.value = p.title ?? '';
       form.elements.description.value = p.description ?? '';
-      if (form.elements.imageAsset) form.elements.imageAsset.value = p.imageAsset ?? '';
+      if (form.elements.imageAsset) {
+        form.elements.imageAsset.value = p.imageAsset ?? '';
+        form.elements.imageAsset.dispatchEvent(new Event('change', { bubbles: true }));
+      }
       if (form.elements.imageUrl) form.elements.imageUrl.value = p.imageUrl ?? '';
       renderMethods(p.methods);
     });
