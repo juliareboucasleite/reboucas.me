@@ -85,21 +85,22 @@ function buildVerifyPanel(config) {
 
 async function handleVerifyButton(interaction) {
   const config = lerConfigGuild(interaction.guildId);
-  const roleId = config.verification?.roleId;
-  if (!roleId) {
+  const roleIds = config.verification?.roleIds || [];
+  if (!roleIds || roleIds.length === 0) {
     return interaction.reply({
-      content: 'verification is not set up yet — ask an admin to configure the role in the panel.',
+      content: 'verification is not set up yet — ask an admin to configure the roles in the panel.',
       ephemeral: true,
     });
   }
 
   const member = interaction.member;
-  if (member.roles.cache.has(roleId)) {
+  const hasAnyRole = roleIds.some((roleId) => member.roles.cache.has(roleId));
+  if (hasAnyRole) {
     return interaction.reply({ content: "you're already verified, cutie ✿", ephemeral: true });
   }
 
   try {
-    await member.roles.add(roleId, 'Pawshop verification via button');
+    await member.roles.add(roleIds, 'Pawshop verification via button');
     await interaction.reply({
       content: '✦ verified successfully! enjoy the server (｡•ᴗ•｡)',
       ephemeral: true,
@@ -109,8 +110,8 @@ async function handleVerifyButton(interaction) {
       type: 'verify.granted',
       source: 'bot',
       title: 'Member verified',
-      message: `${interaction.user.tag} clicked verify.`,
-      meta: { userId: interaction.user.id, roleId },
+      message: `${interaction.user.tag} clicked verify and received ${roleIds.length} role(s).`,
+      meta: { userId: interaction.user.id, roleIds },
     });
   } catch (err) {
     console.error('[verify]', err);

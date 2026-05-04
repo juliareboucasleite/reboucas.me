@@ -133,9 +133,9 @@ function buildMemberEmbed(kind, guild, user, memberCount, config) {
       : [
           renderTemplate(section.intro, vars),
           '',
-          `🍼 ${vars.ticketChannel}`,
-          `🍼 ${vars.pricesChannel}`,
-          `🍼 ${vars.infoChannel}`,
+          `🐾 ${vars.ticketChannel}`,
+          `🐾 ${vars.pricesChannel}`,
+          `🐾 ${vars.infoChannel}`,
         ];
 
   if (kind !== 'goodbye' && section.verifyLine) {

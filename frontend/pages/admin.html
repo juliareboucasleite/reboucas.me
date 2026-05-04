@@ -307,16 +307,14 @@
           </div>
           <section class="admin-card">
             <form id="verify-form" class="stack-form">
-              <div class="form-split">
-                <label>
-                  Cargo a entregar
-                  <select name="roleId" data-role-select></select>
-                </label>
-                <label>
-                  Texto do botão
-                  <input name="buttonLabel" placeholder="verificar" />
-                </label>
-              </div>
+              <label>
+                Cargos a entregar (pode selecionar múltiplos)
+                <select name="roleIds" data-role-select multiple style="min-height: 100px;"></select>
+              </label>
+              <label>
+                Texto do botão
+                <input name="buttonLabel" placeholder="verificar" />
+              </label>
               <label>
                 Título do painel
                 <input name="title" placeholder="verifique-se" />

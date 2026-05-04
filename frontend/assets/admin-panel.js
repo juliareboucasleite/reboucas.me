@@ -18,6 +18,8 @@ const refs = {
   refreshDashboard: document.getElementById('refresh-dashboard'),
   productForm: document.getElementById('form-novo'),
   settingsForm: document.getElementById('settings-form'),
+  verifyForm: document.getElementById('verify-form'),
+  verifyPostForm: document.getElementById('verify-post-form'),
   supportHelpForm: document.getElementById('support-help-form'),
   supportInfoForm: document.getElementById('support-info-form'),
   embedForm: document.getElementById('embed-form'),
@@ -366,6 +368,17 @@ function populateSettingsForm() {
     infoForm.channelId.value = settings.support?.info?.channelId || '';
   }
 
+  const verifyForm = refs.verifyForm;
+  if (verifyForm) {
+    verifyForm.title.value = settings.verification?.title || 'verify yourself';
+    verifyForm.description.value = settings.verification?.description || '';
+    verifyForm.buttonLabel.value = settings.verification?.buttonLabel || 'verify';
+    const roleIds = settings.verification?.roleIds || [];
+    Array.from(verifyForm.roleIds.options).forEach((opt) => {
+      opt.selected = roleIds.includes(opt.value);
+    });
+  }
+
   refs.embedForm.channelId.value = settings.channels?.embedChannelId || '';
   refs.embedForm.color.value = settings.appearance?.accentColor || '#f4cfe0';
 
@@ -424,6 +437,7 @@ function getSettingsFromForm() {
             : state.settings?.support?.info || {},
         }
       : state.settings?.support || {},
+    verification: state.settings?.verification || {},
     appearance: {
       accentColor: form.accentColor.value,
       authorName: form.authorName.value,
@@ -681,6 +695,52 @@ refs.previewGoodbye.addEventListener('click', async () => {
   try {
     await requestJson('api/admin/goodbye/preview', { method: 'POST', body: JSON.stringify({}) });
     notify('Preview de bye enviado.');
+    await loadDashboard();
+  } catch (error) {
+    notify(error.message, true);
+  }
+});
+
+refs.verifyForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  try {
+    const form = refs.verifyForm;
+    const roleIds = Array.from(form.roleIds.selectedOptions).map((opt) => opt.value).filter(Boolean);
+
+    const payload = getSettingsFromForm();
+    payload.verification = {
+      roleIds,
+      title: form.title.value,
+      description: form.description.value,
+      buttonLabel: form.buttonLabel.value,
+    };
+
+    state.settings = await requestJson('api/admin/settings', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+
+    notify('Verificação salva.');
+    await loadDashboard();
+  } catch (error) {
+    notify(error.message, true);
+  }
+});
+
+refs.verifyPostForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  try {
+    const channelId = refs.verifyPostForm.channelId.value;
+    if (!channelId) throw new Error('Selecione um canal.');
+
+    await requestJson('api/admin/verify/post', {
+      method: 'POST',
+      body: JSON.stringify({ channelId }),
+    });
+
+    notify('Painel de verificação postado.');
     await loadDashboard();
   } catch (error) {
     notify(error.message, true);

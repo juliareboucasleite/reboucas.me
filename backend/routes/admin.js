@@ -86,7 +86,7 @@ function sanitizeSettings(body) {
       authorName: toText(current.appearance?.authorName) || '/pawshop',
     },
     verification: {
-      roleId: toText(current.verification?.roleId),
+      roleIds: Array.isArray(current.verification?.roleIds) ? current.verification.roleIds.filter(Boolean) : [],
       title: toText(current.verification?.title) || 'verify yourself',
       description:
         toText(current.verification?.description) ||
@@ -444,8 +444,8 @@ function criarAdminRouter(client) {
       if (!channel?.isTextBased()) return res.status(400).json({ erro: 'Canal inválido.' });
 
       const config = lerConfigGuild(guildId);
-      if (!config.verification?.roleId) {
-        return res.status(400).json({ erro: 'Configure um cargo de verificação primeiro.' });
+      if (!config.verification?.roleIds || config.verification.roleIds.length === 0) {
+        return res.status(400).json({ erro: 'Configure ao menos um cargo de verificação primeiro.' });
       }
 
       const sent = await channel.send(buildVerifyPanel(config));

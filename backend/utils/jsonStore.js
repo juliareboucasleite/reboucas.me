@@ -55,7 +55,7 @@ function criarConfigPadraoGuild() {
       authorName: '/pawshop',
     },
     verification: {
-      roleId: '',
+      roleIds: [],
       title: 'verify yourself',
       description: 'click the button below to unlock the rest of the server (｡•ᴗ•｡)',
       buttonLabel: 'verify',
