@@ -5,12 +5,23 @@ const { lerConfigGuild } = require('../../backend/utils/jsonStore');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('suporte')
-    .setDescription('[Admin] Post a support panel with help and information tickets in the current channel.'),
+    .setDescription('[Admin] Post a support panel in the current channel.')
+    .addStringOption((option) =>
+      option
+        .setName('tipo')
+        .setDescription('Which panel to post')
+        .setRequired(true)
+        .addChoices(
+          { name: 'help', value: 'help' },
+          { name: 'information', value: 'info' },
+        ),
+    ),
   async execute(interaction) {
     const config = lerConfigGuild(interaction.guildId);
-    await interaction.channel.send(buildSupportPanel(config));
+    const kind = interaction.options.getString('tipo', true);
+    await interaction.channel.send(buildSupportPanel(config, kind));
     await interaction.reply({
-      content: 'support panel posted ✦',
+      content: `${kind === 'info' ? 'information' : 'help'} panel posted`,
       flags: MessageFlags.Ephemeral,
     });
   },
