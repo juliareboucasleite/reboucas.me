@@ -60,6 +60,7 @@
           <a href="#embeds" class="admin-menu__link">Embeds</a>
           <a href="#verify" class="admin-menu__link">Verificação</a>
           <a href="#precos" class="admin-menu__link">Ticket de preços</a>
+          <a href="#support-tickets" class="admin-menu__link">Tickets de ajuda</a>
           <a href="#sorteios" class="admin-menu__link">Sorteios</a>
           <a href="#forum" class="admin-menu__link">Fórum</a>
           <a href="#logs" class="admin-menu__link">Logs</a>
@@ -387,6 +388,67 @@
               <button type="submit" class="btn btn--outline">Postar agora</button>
             </form>
           </section>
+        </section>
+
+        <section id="support-tickets" class="admin-section">
+          <div class="admin-section__head">
+            <div>
+              <span class="eyebrow">Ajuda</span>
+              <h2>Tickets de ajuda e informação</h2>
+            </div>
+          </div>
+
+          <div class="admin-grid">
+            <section class="admin-card">
+              <h3>Configuração do painel</h3>
+              <form id="support-form" class="stack-form">
+                <label>
+                  Título do painel
+                  <input name="supportTitle" placeholder="Do you have a question?" />
+                </label>
+                <label>
+                  Descrição
+                  <textarea name="supportDescription" placeholder="If you have any questions, you can open a ticket and ask!"></textarea>
+                </label>
+                <div class="form-split">
+                  <label>
+                    Texto do botão Help
+                    <input name="helpButtonLabel" placeholder="Help" />
+                  </label>
+                  <label>
+                    Texto do botão Information
+                    <input name="infoButtonLabel" placeholder="Information" />
+                  </label>
+                </div>
+                <label>
+                  Rodapé
+                  <input name="supportFooter" placeholder="Powered by tickets.bot" />
+                </label>
+                <div class="form-split">
+                  <label>
+                    Categoria Help
+                    <select name="helpCategoryId" data-category-select></select>
+                  </label>
+                  <label>
+                    Categoria Information
+                    <select name="infoCategoryId" data-category-select></select>
+                  </label>
+                </div>
+                <button type="submit" class="btn btn--primary">Salvar suporte</button>
+              </form>
+            </section>
+
+            <section class="admin-card">
+              <h3>Postar painel num canal</h3>
+              <form id="support-post-form" class="stack-form">
+                <label>
+                  Canal
+                  <select name="channelId" data-channel-select></select>
+                </label>
+                <button type="submit" class="btn btn--outline">Postar agora</button>
+              </form>
+            </section>
+          </div>
         </section>
 
         <section id="sorteios" class="admin-section">

@@ -187,7 +187,6 @@ function buildPrecosPanel(config) {
   return { embeds: [embed], components: rows, files };
 }
 
-async function createTicketChannel(interaction, { title, description, logType, logTitle, logMessage, topicLabel }) {
 async function createTicketChannel(interaction, { title, description, logType, logTitle, logMessage, topicLabel, categoryId }) {
   const config = lerConfigGuild(interaction.guildId);
   const guild = interaction.guild;

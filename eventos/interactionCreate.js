@@ -3,6 +3,7 @@ const { ehAdmin } = require('../backend/utils/jsonStore');
 const {
   handleVerifyButton,
   handleSupportOpenButton,
+  handleSupportInfoButton,
   handlePrecosButton,
   handleTicketClose,
   handleTicketClaim,
@@ -19,7 +20,8 @@ module.exports = {
       const id = interaction.customId;
       try {
         if (id === 'paw:verify') return handleVerifyButton(interaction);
-        if (id === 'paw:support:open') return handleSupportOpenButton(interaction);
+        if (id === 'paw:support:open' || id === 'paw:support:help') return handleSupportOpenButton(interaction);
+        if (id === 'paw:support:info') return handleSupportInfoButton(interaction);
         if (id === 'paw:ticket-close') return handleTicketClose(interaction);
         if (id === 'paw:ticket:close') return handleTicketClose(interaction);
         if (id === 'paw:ticket:close-reason') return handleTicketCloseWithReason(interaction);

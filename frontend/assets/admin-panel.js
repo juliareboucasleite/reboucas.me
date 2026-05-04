@@ -18,6 +18,8 @@ const refs = {
   refreshDashboard: document.getElementById('refresh-dashboard'),
   productForm: document.getElementById('form-novo'),
   settingsForm: document.getElementById('settings-form'),
+  supportForm: document.getElementById('support-form'),
+  supportPostForm: document.getElementById('support-post-form'),
   embedForm: document.getElementById('embed-form'),
   previewWelcome: document.getElementById('preview-welcome'),
   previewGoodbye: document.getElementById('preview-goodbye'),
@@ -346,6 +348,17 @@ function populateSettingsForm() {
   form.goodbyeOutro.value = settings.goodbye?.outro || '';
   form.goodbyeMemberCountText.value = settings.goodbye?.memberCountText || '';
 
+  const supportForm = refs.supportForm;
+  if (supportForm) {
+    supportForm.supportTitle.value = settings.support?.title || 'Do you have a question?';
+    supportForm.supportDescription.value = settings.support?.description || '';
+    supportForm.helpButtonLabel.value = settings.support?.helpButtonLabel || 'Help';
+    supportForm.infoButtonLabel.value = settings.support?.infoButtonLabel || 'Information';
+    supportForm.supportFooter.value = settings.support?.footer || 'Powered by tickets.bot';
+    supportForm.helpCategoryId.value = settings.support?.helpCategoryId || '';
+    supportForm.infoCategoryId.value = settings.support?.infoCategoryId || '';
+  }
+
   refs.embedForm.channelId.value = settings.channels?.embedChannelId || '';
   refs.embedForm.color.value = settings.appearance?.accentColor || '#f4cfe0';
 
@@ -380,6 +393,17 @@ function getSettingsFromForm() {
       outro: form.goodbyeOutro.value,
       memberCountText: form.goodbyeMemberCountText.value,
     },
+    support: refs.supportForm
+      ? {
+          title: refs.supportForm.supportTitle.value,
+          description: refs.supportForm.supportDescription.value,
+          helpButtonLabel: refs.supportForm.helpButtonLabel.value,
+          infoButtonLabel: refs.supportForm.infoButtonLabel.value,
+          footer: refs.supportForm.supportFooter.value,
+          helpCategoryId: refs.supportForm.helpCategoryId.value,
+          infoCategoryId: refs.supportForm.infoCategoryId.value,
+        }
+      : state.settings?.support || {},
     appearance: {
       accentColor: form.accentColor.value,
       authorName: form.authorName.value,
@@ -536,6 +560,38 @@ refs.productForm.addEventListener('submit', async (event) => {
 
 refs.settingsForm.addEventListener('input', renderPreviewCards);
 refs.settingsForm.addEventListener('change', renderPreviewCards);
+
+refs.supportForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  try {
+    const payload = getSettingsFromForm();
+    state.settings = await requestJson('api/admin/settings', {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
+    notify('Suporte salvo.');
+    await loadDashboard();
+  } catch (error) {
+    notify(error.message, true);
+  }
+});
+
+refs.supportPostForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  try {
+    const formData = new FormData(event.currentTarget);
+    await requestJson('api/admin/support/post', {
+      method: 'POST',
+      body: JSON.stringify({ channelId: formData.get('channelId') }),
+    });
+    notify('Painel de suporte postado.');
+    await loadDashboard();
+  } catch (error) {
+    notify(error.message, true);
+  }
+});
 
 refs.settingsForm.addEventListener('submit', async (event) => {
   event.preventDefault();
