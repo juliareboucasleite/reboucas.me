@@ -239,7 +239,7 @@ async function handleSupportOpenButton(interaction) {
     description:
       'Thank you for contacting support.\nPlease describe your issue and wait for a response.',
     topicLabel: 'help',
-    ticketKind: 'support-help',
+    ticketKind: 'help',
     logType: 'support.help.opened',
     logTitle: 'Help ticket opened',
     logMessage: `${interaction.user.tag} opened a help ticket.`,
@@ -253,7 +253,7 @@ async function handleSupportInfoButton(interaction) {
     description:
       'Thanks for reaching out.\nPlease share what information you need and wait for a response.',
     topicLabel: 'information',
-    ticketKind: 'support-info',
+    ticketKind: 'info',
     logType: 'support.info.opened',
     logTitle: 'Information ticket opened',
     logMessage: `${interaction.user.tag} opened an information ticket.`,

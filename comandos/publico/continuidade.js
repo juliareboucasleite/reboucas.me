@@ -17,9 +17,9 @@ module.exports = {
     const channel = interaction.channel;
     const ticketKind = lerTipoTicket(channel);
 
-    if (ticketKind !== 'prices' && ticketKind !== 'help') {
+    if (ticketKind !== 'prices' && ticketKind !== 'help' && ticketKind !== 'info') {
       return interaction.reply({
-        content: 'Use este comando apenas dentro de um ticket de preços ou de ajuda.',
+        content: 'Use este comando apenas dentro de um ticket.',
         flags: MessageFlags.Ephemeral,
       });
     }

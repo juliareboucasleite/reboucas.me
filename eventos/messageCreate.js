@@ -177,7 +177,7 @@ module.exports = {
     if (!message.guild || message.author.bot) return;
 
     const ticketKind = lerTipoTicket(message.channel);
-    if (ticketKind === 'prices' || ticketKind === 'help') {
+    if (ticketKind === 'prices' || ticketKind === 'help' || ticketKind === 'info') {
       const tracking = incrementarTicketTracking(message.channel.id, {
         kind: ticketKind,
         createdBy: message.channel.topic?.split(':')[2] || '',
