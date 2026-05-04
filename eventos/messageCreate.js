@@ -1,5 +1,11 @@
 const { Events, MessageFlags } = require('discord.js');
-const { ehAdmin } = require('../backend/utils/jsonStore');
+const {
+  ehAdmin,
+  incrementarTicketTracking,
+  atualizarTicketTracking,
+} = require('../backend/utils/jsonStore');
+
+const ROLE_CONTINUIDADE_ID = '1492998062858174544';
 
 const PREFIXO = '-';
 
@@ -159,10 +165,32 @@ function validarPrefixo(commandName, args) {
   return null;
 }
 
+function lerTipoTicket(channel) {
+  const topic = String(channel?.topic || '');
+  const match = topic.match(/^pawshop-ticket:([^:]+):/i);
+  return match ? match[1].toLowerCase() : '';
+}
+
 module.exports = {
   name: Events.MessageCreate,
   async execute(message, client) {
     if (!message.guild || message.author.bot) return;
+
+    const ticketKind = lerTipoTicket(message.channel);
+    if (ticketKind === 'prices') {
+      const tracking = incrementarTicketTracking(message.channel.id, {
+        kind: ticketKind,
+        createdBy: message.channel.topic?.split(':')[2] || '',
+      });
+
+      if (tracking.messageCount >= 10 && !tracking.warnedAt10) {
+        await message.channel.send(
+          `Se quiser dar continuidade, use /continuidade para receber o cargo <@&${ROLE_CONTINUIDADE_ID}>.`,
+        ).catch(() => {});
+        await atualizarTicketTracking(message.channel.id, { warnedAt10: true });
+      }
+    }
+
     if (!message.content.startsWith(PREFIXO)) return;
 
     const semPrefixo = message.content.slice(PREFIXO.length).trim();

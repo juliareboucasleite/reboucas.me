@@ -187,7 +187,7 @@ function buildPrecosPanel(config) {
   return { embeds: [embed], components: rows, files };
 }
 
-async function createTicketChannel(interaction, { title, description, logType, logTitle, logMessage, topicLabel, categoryId }) {
+async function createTicketChannel(interaction, { title, description, logType, logTitle, logMessage, topicLabel, ticketKind = 'support', categoryId }) {
   const config = lerConfigGuild(interaction.guildId);
   const guild = interaction.guild;
   if (!guild) return null;
@@ -201,6 +201,7 @@ async function createTicketChannel(interaction, { title, description, logType, l
     const channel = await guild.channels.create({
       name: safeName || `help-${interaction.user.id.slice(-5)}`,
       type: ChannelType.GuildText,
+      topic: `pawshop-ticket:${ticketKind}:${interaction.user.id}`,
       parent: targetCategoryId || undefined,
       permissionOverwrites: [
         {
@@ -231,7 +232,7 @@ async function createTicketChannel(interaction, { title, description, logType, l
       source: 'bot',
       title: logTitle,
       message: logMessage,
-      meta: { userId: interaction.user.id, channelId: channel.id, topicLabel },
+      meta: { userId: interaction.user.id, channelId: channel.id, topicLabel, ticketKind },
     });
 
     return channel;
@@ -250,6 +251,7 @@ async function handleSupportOpenButton(interaction) {
     description:
       'Thank you for contacting support.\nPlease describe your issue and wait for a response.',
     topicLabel: 'help',
+    ticketKind: 'support-help',
     logType: 'support.help.opened',
     logTitle: 'Help ticket opened',
     logMessage: `${interaction.user.tag} opened a help ticket.`,
@@ -263,6 +265,7 @@ async function handleSupportInfoButton(interaction) {
     description:
       'Thanks for reaching out.\nPlease share what information you need and wait for a response.',
     topicLabel: 'information',
+    ticketKind: 'support-info',
     logType: 'support.info.opened',
     logTitle: 'Information ticket opened',
     logMessage: `${interaction.user.tag} opened an information ticket.`,
@@ -281,6 +284,7 @@ async function handlePrecosButton(interaction, method) {
       `topic: **${methodLabel}**\n\n` +
       'send your question or what you need help with, and wait for someone to reply.',
     topicLabel: methodLabel,
+    ticketKind: 'prices',
     logType: 'ticket.opened',
     logTitle: 'Help ticket opened',
     logMessage: `${interaction.user.tag} chose ${methodLabel}.`,

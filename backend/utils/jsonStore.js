@@ -88,7 +88,7 @@ function criarConfigPadraoGuild() {
 }
 
 function lerDiscordData() {
-  return lerJson(ARQ_DISCORD, { guilds: {}, activityLogs: [] });
+  return lerJson(ARQ_DISCORD, { guilds: {}, activityLogs: [], ticketTracking: {} });
 }
 
 function salvarDiscordData(dados) {
@@ -154,6 +154,40 @@ function adicionarLogAtividade(entry) {
   dados.activityLogs = logs.slice(0, 250);
   salvarDiscordData(dados);
   return dados.activityLogs[0];
+}
+
+function lerTicketTracking() {
+  const dados = lerDiscordData();
+  return dados.ticketTracking ?? {};
+}
+
+function salvarTicketTracking(ticketTracking) {
+  const dados = lerDiscordData();
+  dados.ticketTracking = ticketTracking ?? {};
+  salvarDiscordData(dados);
+  return dados.ticketTracking;
+}
+
+function atualizarTicketTracking(channelId, parcial) {
+  const ticketTracking = lerTicketTracking();
+  const atual = ticketTracking[String(channelId)] ?? {
+    channelId: String(channelId),
+    messageCount: 0,
+    warnedAt10: false,
+    continuityGranted: false,
+    kind: '',
+    createdBy: '',
+  };
+
+  ticketTracking[String(channelId)] = { ...atual, ...parcial, channelId: String(channelId) };
+  salvarTicketTracking(ticketTracking);
+  return ticketTracking[String(channelId)];
+}
+
+function incrementarTicketTracking(channelId, defaults = {}) {
+  const atual = atualizarTicketTracking(channelId, defaults);
+  const messageCount = Number(atual.messageCount || 0) + 1;
+  return atualizarTicketTracking(channelId, { ...defaults, messageCount });
 }
 
 function lerProdutos() {
@@ -231,6 +265,10 @@ module.exports = {
   atualizarConfigGuild,
   lerLogsAtividade,
   adicionarLogAtividade,
+  lerTicketTracking,
+  salvarTicketTracking,
+  atualizarTicketTracking,
+  incrementarTicketTracking,
   lerGiveaways,
   salvarGiveaways,
   adicionarGiveaway,
