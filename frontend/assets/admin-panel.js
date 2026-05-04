@@ -41,9 +41,13 @@ function escapeHtml(value) {
     .replaceAll("'", '&#39;');
 }
 
+function resolveAssetUrl(pathname) {
+  return new URL(String(pathname || ''), document.baseURI).toString();
+}
+
 async function requestJson(url, options = {}) {
   const resolvedUrl = String(url || '');
-  const fetchUrl = resolvedUrl.startsWith('/') || resolvedUrl.startsWith('http') ? resolvedUrl : `/${resolvedUrl}`;
+  const fetchUrl = new URL(resolvedUrl, document.baseURI).toString();
 
   const response = await fetch(fetchUrl, {
     headers: {
@@ -245,7 +249,7 @@ function renderImagePickerFor(select, assets) {
       const isSelected = (asset.value || '') === current;
       const thumb = asset.isEmpty
         ? '<span class="image-picker__none" aria-hidden="true">∅</span>'
-        : `<img src="images/${encodeURIComponent(asset.value)}" alt="${escapeHtml(asset.label)}" loading="lazy" />`;
+        : `<img src="${escapeHtml(resolveAssetUrl(`images/${encodeURIComponent(asset.value)}`))}" alt="${escapeHtml(asset.label)}" loading="lazy" />`;
       return `
         <button
           type="button"
@@ -412,7 +416,7 @@ function renderPreviewCards() {
         <strong>${escapeHtml(author)}</strong>
         <p>${escapeHtml(replaceTokens(settings.welcome.title, 'welcome'))}</p>
       </div>
-      <img src="images/Logo.png" alt="Logo Pawshop" class="discord-card__thumb" />
+      <img src="${escapeHtml(resolveAssetUrl('images/Logo.png'))}" alt="Logo Pawshop" class="discord-card__thumb" />
     </div>
     <div class="discord-card__body">
       <p>${escapeHtml(replaceTokens(settings.welcome.intro, 'welcome'))}</p>
@@ -420,7 +424,7 @@ function renderPreviewCards() {
       <p>🍼 ${escapeHtml(channelLabel(settings.channels.pricesChannelId))}</p>
       <p>🍼 ${escapeHtml(channelLabel(settings.channels.infoChannelId))}</p>
       <p>${escapeHtml(replaceTokens(settings.welcome.verifyLine, 'welcome'))}</p>
-      <img src="images/Welcome.png" alt="Preview welcome" class="discord-card__banner" />
+      <img src="${escapeHtml(resolveAssetUrl('images/Welcome.png'))}" alt="Preview welcome" class="discord-card__banner" />
       <small>${escapeHtml(replaceTokens(settings.welcome.memberCountText, 'welcome'))}</small>
     </div>`;
 
@@ -430,38 +434,78 @@ function renderPreviewCards() {
         <strong>${escapeHtml(author)}</strong>
         <p>${escapeHtml(replaceTokens(settings.goodbye.title, 'goodbye'))}</p>
       </div>
-      <img src="images/Logo.png" alt="Logo Pawshop" class="discord-card__thumb" />
+      <img src="${escapeHtml(resolveAssetUrl('images/Logo.png'))}" alt="Logo Pawshop" class="discord-card__thumb" />
     </div>
     <div class="discord-card__body">
       <p>${escapeHtml(replaceTokens(settings.goodbye.intro, 'goodbye'))}</p>
       <p>${escapeHtml(replaceTokens(settings.goodbye.outro, 'goodbye'))}</p>
-      <img src="images/byebye.png" alt="Preview bye" class="discord-card__banner discord-card__banner--small" />
+      <img src="${escapeHtml(resolveAssetUrl('images/byebye.png'))}" alt="Preview bye" class="discord-card__banner discord-card__banner--small" />
       <small>${escapeHtml(replaceTokens(settings.goodbye.memberCountText, 'goodbye'))}</small>
     </div>`;
 }
 
+function showBannerErrors(errors) {
+  let banner = document.getElementById('admin-error-banner');
+  if (!errors.length) {
+    if (banner) banner.remove();
+    return;
+  }
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'admin-error-banner';
+    banner.style.cssText =
+      'position:sticky;top:0;z-index:50;padding:0.7rem 1rem;background:#ffe1ec;color:#922;border-bottom:1px solid #f3a;font:13px/1.4 Arial,sans-serif;';
+    document.body.prepend(banner);
+  }
+  banner.innerHTML =
+    '<strong>Falhas ao carregar:</strong> ' +
+    errors.map((e) => `<span>${escapeHtml(e)}</span>`).join(' · ');
+}
+
 async function loadCurrentUser() {
-  state.me = await requestJson('api/me');
-  refs.me.textContent = state.me ? `★ ${state.me.global_name ?? state.me.username}` : '—';
+  try {
+    state.me = await requestJson('api/me');
+    refs.me.textContent = state.me ? `★ ${state.me.global_name ?? state.me.username}` : '—';
+  } catch (error) {
+    refs.me.textContent = '—';
+    console.warn('[admin] loadCurrentUser failed:', error);
+  }
 }
 
 async function loadDashboard() {
-  const payload = await requestJson('api/admin/dashboard');
-  console.debug('[admin] dashboard payload images:', payload.images);
-  state.guild = payload.guild;
-  state.stats = payload.stats;
-  state.channels = payload.channels || [];
-  state.imageAssets = payload.images || [];
-  state.settings = payload.settings || null;
-  state.logs = payload.logs || [];
-  state.products = await requestJson('api/admin/produtos');
+  const errors = [];
 
-  fillChannelSelects();
-  await fillImageAssetSelects();
-  renderOverview();
-  populateSettingsForm();
-  renderProducts();
-  renderLogs();
+  try {
+    const payload = await requestJson('api/admin/dashboard');
+    console.debug('[admin] dashboard payload:', payload);
+    state.guild = payload.guild ?? null;
+    state.stats = payload.stats ?? null;
+    state.channels = Array.isArray(payload.channels) ? payload.channels : [];
+    state.imageAssets = Array.isArray(payload.images) ? payload.images : [];
+    state.settings = payload.settings ?? null;
+    state.logs = Array.isArray(payload.logs) ? payload.logs : [];
+  } catch (error) {
+    console.error('[admin] dashboard failed:', error);
+    errors.push(`dashboard: ${error.message}`);
+  }
+
+  try {
+    const produtos = await requestJson('api/admin/produtos');
+    state.products = Array.isArray(produtos) ? produtos : [];
+  } catch (error) {
+    console.error('[admin] produtos failed:', error);
+    state.products = [];
+    errors.push(`produtos: ${error.message}`);
+  }
+
+  try { fillChannelSelects(); } catch (e) { errors.push(`canais: ${e.message}`); }
+  try { await fillImageAssetSelects(); } catch (e) { errors.push(`imagens: ${e.message}`); }
+  try { renderOverview(); } catch (e) { errors.push(`overview: ${e.message}`); }
+  try { populateSettingsForm(); } catch (e) { errors.push(`settings: ${e.message}`); }
+  try { renderProducts(); } catch (e) { errors.push(`products render: ${e.message}`); }
+  try { renderLogs(); } catch (e) { errors.push(`logs render: ${e.message}`); }
+
+  showBannerErrors(errors);
 }
 
 refs.refreshDashboard.addEventListener('click', async () => {

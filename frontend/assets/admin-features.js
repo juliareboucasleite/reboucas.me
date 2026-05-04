@@ -22,9 +22,13 @@
     }[m]));
   }
 
+  function resolveAssetUrl(pathname) {
+    return new URL(String(pathname || ''), document.baseURI).toString();
+  }
+
   async function api(url, options = {}) {
     const resolvedUrl = String(url || '');
-    const fetchUrl = resolvedUrl.startsWith('/') || resolvedUrl.startsWith('http') ? resolvedUrl : `/${resolvedUrl}`;
+    const fetchUrl = new URL(resolvedUrl, document.baseURI).toString();
 
     const r = await fetch(fetchUrl, {
       headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...(options.headers ?? {}) },
