@@ -69,6 +69,7 @@ function criarConfigPadraoGuild() {
       infoButtonLabel: 'Information',
       helpCategoryId: '',
       infoCategoryId: '',
+      channelId: '',
     },
     pricing: {
       ticketCategoryId: '',
