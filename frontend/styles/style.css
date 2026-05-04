@@ -1284,6 +1284,7 @@ footer {
   grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
   gap: 0.6rem;
   margin-top: 0.5rem;
+  grid-column: 1 / -1;
 }
 .image-picker__item {
   display: flex;
