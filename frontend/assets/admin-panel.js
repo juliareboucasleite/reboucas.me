@@ -211,21 +211,23 @@ function fillChannelSelects() {
 }
 
 function renderImagePickerFor(select, assets) {
+  if (!select) return;
   const id = select.dataset.pickerId || `img-picker-${Math.random().toString(36).slice(2, 8)}`;
   select.dataset.pickerId = id;
 
+  const anchor = select.closest('label') || select;
   let picker = document.querySelector(`[data-image-asset-picker="${id}"]`);
   if (!picker) {
     picker = document.createElement('div');
     picker.className = 'image-picker';
     picker.dataset.imageAssetPicker = id;
-    select.insertAdjacentElement('afterend', picker);
+    anchor.insertAdjacentElement('afterend', picker);
   }
 
   const current = select.value || '';
   const items = [
     { value: '', label: 'Sem imagem', isEmpty: true },
-    ...assets,
+    ...(assets || []),
   ];
 
   picker.innerHTML = items
@@ -248,7 +250,9 @@ function renderImagePickerFor(select, assets) {
     .join('');
 
   picker.querySelectorAll('[data-asset-value]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
       const value = btn.dataset.assetValue || '';
       select.value = value;
       select.dispatchEvent(new Event('change', { bubbles: true }));
