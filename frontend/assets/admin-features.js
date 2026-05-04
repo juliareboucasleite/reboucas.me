@@ -106,11 +106,21 @@
 
       // cargos
       $$('select[data-role-select]').forEach((sel) => {
-        const cur = sel.value;
+        const cur = sel.hasAttribute('multiple') 
+          ? Array.from(sel.options).filter(opt => opt.selected).map(opt => opt.value)
+          : sel.value;
         sel.innerHTML =
           '<option value="">— escolha o cargo —</option>' +
           roles.map((r) => `<option value="${r.id}">${escapeHtml(r.name)}</option>`).join('');
-        if (cur) sel.value = cur;
+        
+        if (sel.hasAttribute('multiple')) {
+          const curArr = Array.isArray(cur) ? cur : [cur].filter(Boolean);
+          Array.from(sel.options).forEach(opt => {
+            opt.selected = curArr.includes(opt.value);
+          });
+        } else if (cur) {
+          sel.value = cur;
+        }
       });
 
       // categorias

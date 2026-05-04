@@ -374,9 +374,12 @@ function populateSettingsForm() {
     verifyForm.description.value = settings.verification?.description || '';
     verifyForm.buttonLabel.value = settings.verification?.buttonLabel || 'verify';
     const roleIds = settings.verification?.roleIds || [];
-    Array.from(verifyForm.roleIds.options).forEach((opt) => {
-      opt.selected = roleIds.includes(opt.value);
-    });
+    const roleSelect = verifyForm.querySelector('[name="roleIds"]');
+    if (roleSelect) {
+      Array.from(roleSelect.options).forEach((opt) => {
+        opt.selected = roleIds.includes(opt.value);
+      });
+    }
   }
 
   refs.embedForm.channelId.value = settings.channels?.embedChannelId || '';
@@ -706,7 +709,14 @@ refs.verifyForm?.addEventListener('submit', async (event) => {
 
   try {
     const form = refs.verifyForm;
-    const roleIds = Array.from(form.roleIds.selectedOptions).map((opt) => opt.value).filter(Boolean);
+    const roleSelect = form.querySelector('[name="roleIds"]');
+    const roleIds = Array.from(roleSelect.options)
+      .filter((opt) => opt.selected)
+      .map((opt) => opt.value);
+
+    if (roleIds.length === 0) {
+      throw new Error('Selecione ao menos um cargo.');
+    }
 
     const payload = getSettingsFromForm();
     payload.verification = {
