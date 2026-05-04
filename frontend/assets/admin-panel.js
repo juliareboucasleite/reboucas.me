@@ -47,11 +47,17 @@ async function requestJson(url, options = {}) {
 
   const response = await fetch(fetchUrl, {
     headers: {
+      Accept: 'application/json',
       'Content-Type': 'application/json',
       ...(options.headers ?? {}),
     },
     ...options,
   });
+
+  if (response.redirected && /\/login(\?|$)/.test(response.url)) {
+    window.location.href = response.url;
+    throw new Error('Sessão expirada. Redirecionando para login...');
+  }
 
   const isJson = (response.headers.get('content-type') || '').includes('application/json');
   const payload = isJson ? await response.json() : await response.text();
@@ -59,6 +65,10 @@ async function requestJson(url, options = {}) {
   if (!response.ok) {
     const message = typeof payload === 'object' ? payload.erro || 'Falha na requisição.' : payload;
     throw new Error(message);
+  }
+
+  if (!isJson) {
+    throw new Error('Resposta inesperada do servidor (não-JSON). Faça login novamente.');
   }
 
   return payload;

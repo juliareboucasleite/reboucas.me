@@ -27,12 +27,17 @@
     const fetchUrl = resolvedUrl.startsWith('/') || resolvedUrl.startsWith('http') ? resolvedUrl : `/${resolvedUrl}`;
 
     const r = await fetch(fetchUrl, {
-      headers: { 'Content-Type': 'application/json', ...(options.headers ?? {}) },
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json', ...(options.headers ?? {}) },
       ...options,
     });
+    if (r.redirected && /\/login(\?|$)/.test(r.url)) {
+      window.location.href = r.url;
+      throw new Error('sessão expirada');
+    }
     const isJson = (r.headers.get('content-type') || '').includes('application/json');
     const data = isJson ? await r.json() : await r.text();
     if (!r.ok) throw new Error(typeof data === 'object' ? data.erro || 'falha' : data);
+    if (!isJson) throw new Error('resposta inesperada (não-JSON). faça login novamente.');
     return data;
   }
 
