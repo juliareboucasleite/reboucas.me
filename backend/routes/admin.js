@@ -24,6 +24,7 @@ const {
 } = require('../utils/discordAdmin');
 const {
   buildVerifyPanel,
+  buildSupportPanel,
   buildPrecosPanel,
   criarSorteio,
   encerrarSorteio,
@@ -91,6 +92,17 @@ function sanitizeSettings(body) {
         toText(current.verification?.description) ||
         'click the button below to unlock the rest of the server (｡•ᴗ•｡)',
       buttonLabel: toText(current.verification?.buttonLabel) || 'verify',
+    },
+    support: {
+      title: toText(current.support?.title) || 'Do you have a question?',
+      description:
+        toText(current.support?.description) ||
+        'If you have any questions, you can open a ticket and ask!\n\nPlease describe your issue and wait for a response.',
+      footer: toText(current.support?.footer) || 'Powered by tickets.bot',
+      helpButtonLabel: toText(current.support?.helpButtonLabel) || 'Help',
+      infoButtonLabel: toText(current.support?.infoButtonLabel) || 'Information',
+      helpCategoryId: toText(current.support?.helpCategoryId),
+      infoCategoryId: toText(current.support?.infoCategoryId),
     },
     pricing: {
       ticketCategoryId: toText(current.pricing?.ticketCategoryId),
@@ -429,6 +441,32 @@ function criarAdminRouter(client) {
       await registrarLogPainel(req, client, guildId, {
         type: 'verify.posted',
         title: 'Verification panel posted',
+        message: `Posted in <#${channelId}>.`,
+      });
+
+      res.json({ ok: true, channelId, messageId: sent.id });
+    } catch (err) {
+      res.status(400).json({ erro: err.message });
+    }
+  });
+
+  router.post('/support/post', async (req, res) => {
+    try {
+      const guildId = getManagedGuildId(client);
+      if (!guildId) return res.status(404).json({ erro: 'Guild não configurada.' });
+
+      const channelId = toText(req.body?.channelId);
+      if (!channelId) return res.status(400).json({ erro: 'channelId obrigatório.' });
+
+      const guild = await getManagedGuild(client, guildId);
+      const channel = await guild.channels.fetch(channelId).catch(() => null);
+      if (!channel?.isTextBased()) return res.status(400).json({ erro: 'Canal inválido.' });
+
+      const config = lerConfigGuild(guildId);
+      const sent = await channel.send(buildSupportPanel(config));
+      await registrarLogPainel(req, client, guildId, {
+        type: 'support.posted',
+        title: 'Support panel posted',
         message: `Posted in <#${channelId}>.`,
       });
 
