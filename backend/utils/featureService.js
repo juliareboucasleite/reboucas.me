@@ -145,7 +145,7 @@ function buildPrecosPanel(config) {
   const embed = new EmbedBuilder()
     .setColor(config.appearance?.accentColor ?? '#f4cfe0')
     .setTitle(p.title || 'price list · pawshop')
-    .setDescription(p.description || 'choose a payment method to open a ticket with the staff.')
+    .setDescription(p.description || 'Choose a payment method below.\n\nEach method opens a ticket where you can speak with our staff.\n\nHave questions? Use the **/help** command.')
     .addFields(
       enabled.map((k) => ({
         name: p.methods?.[k]?.label ?? k,
