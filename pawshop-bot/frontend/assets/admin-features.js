@@ -164,37 +164,13 @@
   // ---------- VERIFICAÇÃO ----------
   function setupVerify() {
     const form = $('#verify-form');
-    const postForm = $('#verify-post-form');
     if (!form) return;
-
+    const postForm = $('#verify-post-form');
     api('api/admin/settings').then((s) => {
-      const v = s.verification ?? {};
-      form.elements.roleId.value = v.roleId ?? '';
-      form.elements.buttonLabel.value = v.buttonLabel ?? '';
-      form.elements.title.value = v.title ?? '';
-      form.elements.description.value = v.description ?? '';
-    });
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const fd = Object.fromEntries(new FormData(form).entries());
-      try {
-        const atual = await api('api/admin/settings');
-        await api('api/admin/settings', {
-          method: 'PUT',
-          body: JSON.stringify({ ...atual, verification: { ...(atual.verification || {}), ...fd } }),
-        });
-        toast('verificação salva ✦');
-      } catch (err) { toast(err.message, true); }
-    });
-
-    postForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const fd = Object.fromEntries(new FormData(postForm).entries());
-      try {
-        await api('api/admin/verify/post', { method: 'POST', body: JSON.stringify(fd) });
-        toast('painel postado ✦');
-      } catch (err) { toast(err.message, true); }
+      if (postForm?.elements?.channelId) {
+        postForm.elements.channelId.value =
+          s.verification?.channelId ?? '1500443369074065449';
+      }
     });
   }
 
