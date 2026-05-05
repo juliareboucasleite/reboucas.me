@@ -438,7 +438,7 @@ function criarAdminRouter(client) {
       const guildId = getManagedGuildId(client);
       if (!guildId) return res.status(404).json({ erro: 'Guild não configurada.' });
 
-      const channelId = toText(req.body?.channelId);
+      const channelId = toText(req.body?.channelId) || toText(lerConfigGuild(guildId).verification?.channelId);
       if (!channelId) return res.status(400).json({ erro: 'channelId obrigatório.' });
 
       const guild = await getManagedGuild(client, guildId);
@@ -450,14 +450,14 @@ function criarAdminRouter(client) {
         return res.status(400).json({ erro: 'Configure ao menos um cargo de verificação primeiro.' });
       }
 
-      const sent = await channel.send(buildVerifyPanel(config));
+      const sent = await ensureVerifyPanel(client, guildId, channelId);
       await registrarLogPainel(req, client, guildId, {
         type: 'verify.posted',
         title: 'Verification panel posted',
         message: `Posted in <#${channelId}>.`,
       });
 
-      res.json({ ok: true, channelId, messageId: sent.id });
+      res.json({ ok: true, channelId: sent.channel.id, messageId: sent.message.id });
     } catch (err) {
       res.status(400).json({ erro: err.message });
     }
