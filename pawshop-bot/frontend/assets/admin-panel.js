@@ -36,6 +36,7 @@ const DEFAULT_IMAGE_ASSETS = [
   { value: 'Logo.png', label: 'Logo.png' },
   { value: 'prices.png', label: 'prices.png' },
 ];
+const DEFAULT_VERIFY_CHANNEL_ID = '1500443369074065449';
 
 function escapeHtml(value) {
   return String(value ?? '')
@@ -382,6 +383,11 @@ function populateSettingsForm() {
         checkbox.checked = roleIds.includes(checkbox.value);
       });
     }
+  }
+
+  if (refs.verifyPostForm) {
+    refs.verifyPostForm.channelId.value =
+      settings.verification?.channelId || DEFAULT_VERIFY_CHANNEL_ID;
   }
 
   refs.embedForm.channelId.value = settings.channels?.embedChannelId || '';
