@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const { lerProdutos } = require('../../backend/utils/jsonStore');
 const config = require('../../config/config.json');
 
@@ -37,7 +37,7 @@ module.exports = {
     const lista = filtro ? todos.filter((p) => p.categoria === filtro) : todos;
 
     if (lista.length === 0) {
-      return interaction.reply({ content: 'No products found.', ephemeral: true });
+      return interaction.reply({ content: 'No products found.', flags: MessageFlags.Ephemeral });
     }
 
     const embed = new EmbedBuilder()
