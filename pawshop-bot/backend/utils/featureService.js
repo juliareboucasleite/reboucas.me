@@ -5,6 +5,7 @@ const {
   ButtonStyle,
   ChannelType,
   EmbedBuilder,
+  MessageFlags,
   PermissionFlagsBits,
   ModalBuilder,
   TextInputBuilder,
@@ -18,6 +19,8 @@ const {
   adicionarGiveaway,
   removerGiveaway,
   adicionarLogAtividade,
+  atualizarConfigGuild,
+  DEFAULT_VERIFY_CHANNEL_ID,
 } = require('./jsonStore');
 const { createImageFiles, getManagedGuild, getManagedGuildId, resolveImageAssetFilename } = require('./discordAdmin');
 
@@ -83,27 +86,69 @@ function buildVerifyPanel(config) {
   return { embeds: [embed], components: [row] };
 }
 
+async function ensureVerifyPanel(client, guildId, requestedChannelId = '') {
+  const guild = await getManagedGuild(client, guildId);
+  if (!guild) throw new Error('Guild nao encontrada.');
+
+  const config = lerConfigGuild(guildId);
+  if (!config.verification?.roleIds || config.verification.roleIds.length === 0) {
+    throw new Error('Configure ao menos um cargo de verificacao primeiro.');
+  }
+
+  const storedChannelId = String(config.verification?.channelId || '').trim();
+  const targetChannelId = String(requestedChannelId || storedChannelId || DEFAULT_VERIFY_CHANNEL_ID).trim();
+  if (!targetChannelId) throw new Error('Canal de verificacao nao configurado.');
+
+  const channel = guild.channels.cache.get(targetChannelId) ?? (await guild.channels.fetch(targetChannelId).catch(() => null));
+  if (!channel?.isTextBased()) throw new Error('Canal invalido.');
+
+  const panel = buildVerifyPanel(config);
+  const storedMessageId = String(config.verification?.messageId || '').trim();
+  let sent = null;
+
+  if (storedMessageId) {
+    const existingMessage = await channel.messages.fetch(storedMessageId).catch(() => null);
+    if (existingMessage) {
+      sent = await existingMessage.edit(panel);
+    }
+  }
+
+  if (!sent) {
+    sent = await channel.send(panel);
+  }
+
+  const nextConfig = atualizarConfigGuild(guildId, {
+    verification: {
+      ...(config.verification || {}),
+      channelId: channel.id,
+      messageId: sent.id,
+    },
+  });
+
+  return { channel, message: sent, config: nextConfig };
+}
+
 async function handleVerifyButton(interaction) {
   const config = lerConfigGuild(interaction.guildId);
   const roleIds = config.verification?.roleIds || [];
   if (!roleIds || roleIds.length === 0) {
     return interaction.reply({
       content: 'verification is not set up yet — ask an admin to configure the roles in the panel.',
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   }
 
   const member = interaction.member;
   const hasAnyRole = roleIds.some((roleId) => member.roles.cache.has(roleId));
   if (hasAnyRole) {
-    return interaction.reply({ content: "you're already verified, cutie ✿", ephemeral: true });
+    return interaction.reply({ content: "you're already verified, cutie ✿", flags: MessageFlags.Ephemeral });
   }
 
   try {
     await member.roles.add(roleIds, 'Pawshop verification via button');
     await interaction.reply({
       content: '✦ verified successfully! enjoy the server (｡•ᴗ•｡)',
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
     adicionarLogAtividade({
       guildId: interaction.guildId,
@@ -117,7 +162,7 @@ async function handleVerifyButton(interaction) {
     console.error('[verify]', err);
     await interaction.reply({
       content: "couldn't give you the role. ping an admin to check my permissions.",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   }
 }
@@ -183,7 +228,7 @@ async function createTicketChannel(interaction, { title, description, logType, l
 
   const targetCategoryId = categoryId || config.pricing?.ticketCategoryId;
 
-  await interaction.deferReply({ ephemeral: true });
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
   try {
     const safeName = `help-${interaction.user.username}`.toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, 90);
@@ -284,7 +329,7 @@ async function handleTicketClose(interaction) {
   const channel = interaction.channel;
   if (!channel) return;
   if (!interaction.replied && !interaction.deferred) {
-    await interaction.reply({ content: 'closing the ticket in 5s ⏳', ephemeral: true }).catch(() => {});
+    await interaction.reply({ content: 'closing the ticket in 5s ⏳', flags: MessageFlags.Ephemeral }).catch(() => {});
   }
   setTimeout(() => channel.delete().catch(() => {}), 5000);
 }
@@ -302,7 +347,7 @@ async function handleTicketClaim(interaction, claimed = true) {
 
   await interaction.reply({
     content: claimed ? `Ticket claimed by ${interaction.user.tag}.` : 'Ticket unclaimed.',
-    ephemeral: true,
+    flags: MessageFlags.Ephemeral,
   });
 }
 
@@ -323,7 +368,7 @@ async function handleTicketCloseWithReason(interaction) {
 async function handleTicketCloseReasonModal(interaction) {
   const reason = interaction.fields.getTextInputValue('reason')?.trim() || 'No reason specified';
 
-  await interaction.reply({ content: 'Ticket will be closed in 5 seconds.', ephemeral: true }).catch(() => {});
+  await interaction.reply({ content: 'Ticket will be closed in 5 seconds.', flags: MessageFlags.Ephemeral }).catch(() => {});
 
   if (interaction.channel?.send) {
     await interaction.channel.send({
@@ -381,18 +426,18 @@ async function handleGiveawayButton(interaction, sorteioId) {
   const todos = lerGiveaways();
   const sorteio = todos.find((s) => s.id === sorteioId);
   if (!sorteio || sorteio.status !== 'ativo') {
-    return interaction.reply({ content: "this giveaway isn't active anymore.", ephemeral: true });
+    return interaction.reply({ content: "this giveaway isn't active anymore.", flags: MessageFlags.Ephemeral });
   }
 
   const userId = interaction.user.id;
   if (sorteio.participantes.includes(userId)) {
-    return interaction.reply({ content: "you're already entered ✿", ephemeral: true });
+    return interaction.reply({ content: "you're already entered ✿", flags: MessageFlags.Ephemeral });
   }
 
   sorteio.participantes.push(userId);
   atualizarGiveaway(sorteio.id, { participantes: sorteio.participantes });
 
-  await interaction.reply({ content: '🎉 entered! good luck ✦', ephemeral: true });
+  await interaction.reply({ content: '🎉 entered! good luck ✦', flags: MessageFlags.Ephemeral });
 
   // atualiza embed com novo total
   try {
@@ -551,6 +596,7 @@ async function postForumThread(client, { guildId, forumId, title, content, image
 module.exports = {
   PAYMENT_KEYS,
   buildVerifyPanel,
+  ensureVerifyPanel,
   handleVerifyButton,
   buildSupportPanel,
   buildPrecosPanel,

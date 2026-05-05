@@ -7,6 +7,7 @@ const ARQ_ADMINS = path.join(DIR, 'admins.json');
 const ARQ_DISCORD = path.join(DIR, 'discord.json');
 const ARQ_GIVEAWAYS = path.join(DIR, 'giveaways.json');
 const ARQ_FORUM_LOG = path.join(DIR, 'forumPosts.json');
+const DEFAULT_VERIFY_CHANNEL_ID = '1500443369074065449';
 
 function lerJson(caminho, padrao) {
   try {
@@ -59,6 +60,8 @@ function criarConfigPadraoGuild() {
       title: 'verify yourself',
       description: 'click the button below to unlock the rest of the server (｡•ᴗ•｡)',
       buttonLabel: 'verify',
+      channelId: DEFAULT_VERIFY_CHANNEL_ID,
+      messageId: '',
     },
     support: {
       help: {
@@ -264,6 +267,7 @@ function adicionarForumPost(entry) {
 }
 
 module.exports = {
+  DEFAULT_VERIFY_CHANNEL_ID,
   lerProdutos,
   salvarProdutos,
   lerAdmins,

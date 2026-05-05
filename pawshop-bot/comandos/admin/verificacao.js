@@ -1,24 +1,28 @@
 const { SlashCommandBuilder, MessageFlags } = require('discord.js');
-const { buildVerifyPanel } = require('../../backend/utils/featureService');
-const { lerConfigGuild } = require('../../backend/utils/jsonStore');
+const { lerConfigGuild, DEFAULT_VERIFY_CHANNEL_ID } = require('../../backend/utils/jsonStore');
+const { ensureVerifyPanel } = require('../../backend/utils/featureService');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('verificacao')
-    .setDescription('[Admin] Post the verification panel in the current channel.'),
-  async execute(interaction) {
+    .setDescription('[Admin] Posta ou atualiza o painel de verificacao no canal configurado.'),
+  async execute(interaction, client) {
     const config = lerConfigGuild(interaction.guildId);
-    if (!config.verification?.roleId) {
+    if (!config.verification?.roleIds || config.verification.roleIds.length === 0) {
       return interaction.reply({
-        content:
-          'set up the verification role first in the admin panel → "Verificação" section.',
+        content: 'Configure ao menos um cargo na secao "Verificacao" do painel admin primeiro.',
         flags: MessageFlags.Ephemeral,
       });
     }
 
-    await interaction.channel.send(buildVerifyPanel(config));
+    const result = await ensureVerifyPanel(
+      client,
+      interaction.guildId,
+      config.verification?.channelId || DEFAULT_VERIFY_CHANNEL_ID,
+    );
+
     await interaction.reply({
-      content: 'verification panel posted ✦',
+      content: `Painel de verificacao atualizado em <#${result.channel.id}>.`,
       flags: MessageFlags.Ephemeral,
     });
   },
