@@ -23,7 +23,7 @@ const {
   sendCustomEmbed,
 } = require('../utils/discordAdmin');
 const {
-  buildVerifyPanel,
+  ensureVerifyPanel,
   buildSupportPanel,
   buildPrecosPanel,
   criarSorteio,
@@ -92,6 +92,8 @@ function sanitizeSettings(body) {
         toText(current.verification?.description) ||
         'click the button below to unlock the rest of the server (｡•ᴗ•｡)',
       buttonLabel: toText(current.verification?.buttonLabel) || 'verify',
+      channelId: toText(current.verification?.channelId),
+      messageId: toText(current.verification?.messageId),
     },
     support: {
       help: {
